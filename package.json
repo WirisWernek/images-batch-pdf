@@ -1,0 +1,35 @@
+{
+  "name": "image-to-pdf-converter",
+  "version": "1.0.0",
+  "description": "CLI para converter imagens numeradas em um arquivo PDF",
+  "main": "index.js",
+  "bin": {
+    "img2pdf": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "pdf",
+    "images",
+    "cli",
+    "converter",
+    "nodejs"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "dependencies": {
+    "pdfkit": "^0.14.0"
+  },
+  "optionalDependencies": {
+    "image-size": "^1.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/usuario/image-to-pdf-converter"
+  }
+}
