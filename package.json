@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "analize": "node analizer.js",
+    "proccess": "node proccess.js"
   },
   "keywords": [
     "pdf",
@@ -20,6 +22,7 @@
   "author": "Seu Nome",
   "license": "MIT",
   "dependencies": {
+    "crypto": "^1.0.1",
     "pdfkit": "^0.14.0"
   },
   "optionalDependencies": {
