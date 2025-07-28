@@ -1,13 +1,10 @@
 {
-  "name": "image-to-pdf-converter",
+  "name": "images-batch-pdf",
   "version": "1.0.0",
-  "description": "CLI para converter imagens numeradas em um arquivo PDF",
-  "main": "index.js",
-  "bin": {
-    "img2pdf": "./index.js"
-  },
+  "description": "Sistema para análise de pastas e conversão de imagens em PDF de forma automatizada",
+  "main": "proccess.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node proccess.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "analize": "node analizer.js",
     "proccess": "node proccess.js"
@@ -15,11 +12,14 @@
   "keywords": [
     "pdf",
     "images",
-    "cli",
+    "batch",
+    "folders",
     "converter",
-    "nodejs"
+    "cli",
+    "nodejs",
+    "automation"
   ],
-  "author": "Seu Nome",
+  "author": "Wiris Wernek",
   "license": "MIT",
   "dependencies": {
     "crypto": "^1.0.1",
@@ -33,6 +33,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/usuario/image-to-pdf-converter"
+    "url": "https://github.com/WirisWernek/images-batch-pdf"
   }
 }
