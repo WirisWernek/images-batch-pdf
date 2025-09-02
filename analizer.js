@@ -110,7 +110,11 @@ function main(folderPath) {
         
         console.log(`Arquivo CSV gerado com sucesso!`);
         console.log(`Caminho completo: ${fullCsvPath}`);
-        
+
+        console.log('\n📌 Próximo passo:');
+        console.log(`npm run proccess ${fullCsvPath} ${uuid}`);
+        console.log(`npm run merge ${fullCsvPath} ${uuid}`);
+
         return fullCsvPath;
     } catch (error) {
         console.error(`Erro: ${error.message}`);

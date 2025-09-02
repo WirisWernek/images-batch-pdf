@@ -7,7 +7,8 @@
     "start": "node proccess.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "analize": "node analizer.js",
-    "proccess": "node proccess.js"
+    "proccess": "node proccess.js",
+    "merge": "node merge-pdf.js"
   },
   "keywords": [
     "pdf",

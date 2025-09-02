@@ -17,7 +17,7 @@ Este projeto oferece uma solução completa para converter múltiplas pastas con
 - 📊 **Geração de CSV**: Cria arquivos de controle para processamento em lote
 - �️ **Conversão de imagens**: Transforma imagens numeradas em PDFs
 - 📋 **Processamento em lote**: Converte múltiplas pastas de uma só vez
-- 🔄 **Três modos de operação**: Análise, conversão individual e conversão em lote
+- 🔄 **Quatro modos de operação**: Análise, conversão individual, conversão em lote e fusão em PDF único
 - ✅ **Ordenação inteligente**: Organiza imagens numericamente (1, 2, 3, ..., 10, 11)
 - 🎯 **Preservação de qualidade**: Mantém a qualidade original das imagens
 
@@ -47,7 +47,7 @@ npm install
 mkdir -p csv pdf
 ```
 
-## 🛠️ Como usar - Três modos de operação
+## 🛠️ Como usar - Quatro modos de operação
 
 ### Modo 1: 📊 Análise de Pastas (`analizer.js`)
 
@@ -146,7 +146,94 @@ npm run proccess csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
 🎉 Processamento do CSV concluído!
 ```
 
+### Modo 4: 🔗 Fusão em PDF Único (`merge-pdf.js`)
+
+**O que faz**: Lê um arquivo CSV (gerado pelo `analizer.js`) e combina todas as imagens de todas as pastas em um único arquivo PDF.
+
+**Quando usar**: Quando você quer criar um único documento PDF contendo todas as imagens de múltiplas pastas em sequência.
+
+```bash
+# Usando o CSV gerado pelo analizer
+npm run merge csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv documento-completo
+
+# Especificando nome com extensão
+npm run merge meu-arquivo.csv relatorio-unificado.pdf
+```
+
+**Exemplo de saída no terminal**:
+```
+🔗 Iniciando fusão de imagens de múltiplas pastas em PDF único...
+
+📄 Arquivo CSV: csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
+📄 Arquivo de saída: documento-completo
+
+📋 Coletando imagens de 3 pasta(s)...
+
+📁 Processando pasta 1/3: Pasta1
+   🖼️ Encontradas 8 imagem(ns)
+   ✅ 8 imagem(ns) adicionadas
+
+📁 Processando pasta 2/3: Pasta2
+   🖼️ Encontradas 12 imagem(ns)
+   ✅ 12 imagem(ns) adicionadas
+
+📁 Processando pasta 3/3: Pasta3
+   🖼️ Encontradas 6 imagem(ns)
+   ✅ 6 imagem(ns) adicionadas
+
+🎯 Total de imagens coletadas: 26
+
+📝 Criando PDF unificado...
+   📄 Processadas 10/26 imagens
+   📄 Processadas 20/26 imagens
+   📄 Processadas 26/26 imagens
+
+📊 Estatísticas do processamento:
+   📂 Pastas processadas: 3
+   🖼️ Total de imagens: 26
+
+   📈 Imagens por pasta:
+     • Pasta1: 8 imagem(ns)
+     • Pasta2: 12 imagem(ns)
+     • Pasta3: 6 imagem(ns)
+
+   📄 Arquivo de saída: /home/user/projeto/pdf/documento-completo.pdf
+
+✅ Fusão de PDFs concluída com sucesso!
+🎉 Arquivo unificado salvo em: /home/user/projeto/pdf/documento-completo.pdf
+```
+
 ## 🔗 Como os modos se conectam
+
+O sistema oferece **4 modos diferentes** que podem ser usados conforme sua necessidade:
+
+### 📊 **Modo 1 - Análise** (`analizer.js`)
+- **Entrada**: Um diretório com várias pastas
+- **Saída**: Arquivo CSV listando todas as pastas encontradas
+- **Uso**: Preparação para processamento em lote
+
+### 🔀 **Modo 2 - Conversão Individual** (`proccess.js`)
+- **Entrada**: Uma pasta específica + nome do arquivo
+- **Saída**: Um PDF com as imagens dessa pasta
+- **Uso**: Converter apenas uma pasta por vez
+
+### 📋 **Modo 3 - Conversão em Lote** (`proccess.js` + CSV)
+- **Entrada**: Arquivo CSV (do Modo 1)
+- **Saída**: Múltiplos PDFs (um para cada pasta do CSV)
+- **Uso**: Converter várias pastas em PDFs separados
+
+### 🔗 **Modo 4 - Fusão Unificada** (`merge-pdf.js` + CSV)
+- **Entrada**: Arquivo CSV (do Modo 1)
+- **Saída**: Um único PDF com todas as imagens de todas as pastas
+- **Uso**: Criar um documento único com tudo junto
+
+### 🎯 **Comparação dos Modos de Conversão**
+
+| Modo | Entrada | Resultado | Exemplo de Uso |
+|------|---------|-----------|----------------|
+| **Individual** | 1 pasta | 1 PDF | Converter apenas "Contrato_Casa" |
+| **Lote** | CSV com 3 pastas | 3 PDFs separados | "Contrato_Casa.pdf", "Documento_Carro.pdf", "Certidao.pdf" |
+| **Fusão** | CSV com 3 pastas | 1 PDF unificado | "Documentos_Completos.pdf" (todas as imagens juntas) |
 
 ### Fluxo completo de trabalho:
 
@@ -249,6 +336,7 @@ Pasta2;/caminho/completo/para/Pasta2
 images-batch-pdf/
 ├── analizer.js           # Script de análise de pastas
 ├── proccess.js          # Script de conversão para PDF  
+├── merge-pdf.js         # Script de fusão em PDF único
 ├── package.json         # Configurações e dependências
 ├── readme.md           # Esta documentação
 ├── .gitignore          # Arquivos ignorados pelo Git
@@ -300,6 +388,9 @@ npm run proccess /pasta/com/imagens nome-pdf
 
 # Conversão em lote usando CSV
 npm run proccess csv/nome-do-arquivo.csv
+
+# Fusão de múltiplas pastas em PDF único
+npm run merge csv/nome-do-arquivo.csv documento-unificado
 ```
 
 ## 👨‍💻 Desenvolvido por
