@@ -9,7 +9,8 @@
     "analize": "node analizer.js",
     "proccess": "node proccess.js",
     "merge": "node merge-pdf.js",
-    "epub": "node epub-converter.js"
+    "epub": "node epub-converter.js",
+    "merge-epub": "node merge-epub.js"
   },
   "keywords": [
     "pdf",

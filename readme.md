@@ -17,7 +17,7 @@ Este projeto oferece uma solução completa para converter múltiplas pastas con
 - 📊 **Geração de CSV**: Cria arquivos de controle para processamento em lote
 - �️ **Conversão de imagens**: Transforma imagens numeradas em PDFs
 - 📋 **Processamento em lote**: Converte múltiplas pastas de uma só vez
-- 🔄 **Cinco modos de operação**: Análise, conversão individual, conversão em lote, fusão em PDF único e conversão para EPUB
+- 🔄 **Seis modos de operação**: Análise, conversão individual, conversão em lote, fusão em PDF único, conversão para EPUB e fusão em EPUB único
 - ✅ **Ordenação inteligente**: Organiza imagens numericamente (1, 2, 3, ..., 10, 11)
 - 🎯 **Preservação de qualidade**: Mantém a qualidade original das imagens
 
@@ -47,7 +47,7 @@ npm install
 mkdir -p csv pdf
 ```
 
-## 🛠️ Como usar - Cinco modos de operação
+## 🛠️ Como usar - Seis modos de operação
 
 ### Modo 1: 📊 Análise de Pastas (`analizer.js`)
 
@@ -251,9 +251,82 @@ Encontrados 20 arquivo(s) de imagem
 - ✅ **Responsivo** - Adapta-se ao tamanho da tela do dispositivo
 - ✅ **Leve** - Compactação eficiente das imagens
 
-## 🔗 Como os modos se conectam
+### Modo 6: 📚 Fusão em EPUB Único (`merge-epub.js`)
 
-O sistema oferece **4 modos diferentes** que podem ser usados conforme sua necessidade:
+**O que faz**: Lê um arquivo CSV (gerado pelo `analizer.js`) e combina todas as imagens de todas as pastas em um único arquivo EPUB.
+
+**Quando usar**: Quando você quer criar um único livro eletrônico contendo todas as imagens de múltiplas pastas organizadas por capítulos.
+
+```bash
+# Usando o CSV gerado pelo analizer
+npm run merge-epub csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv manga-completo
+
+# Especificando nome com extensão
+npm run merge-epub meu-arquivo.csv historia-completa.epub
+```
+
+**Exemplo de saída no terminal**:
+```
+📚 Iniciando fusão de imagens de múltiplas pastas em EPUB único...
+
+📄 Arquivo CSV: csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
+📚 Arquivo de saída: manga-completo
+
+📋 Coletando imagens de 3 pasta(s)...
+
+📁 Processando pasta 1/3: Capítulo 1
+   🖼️ Encontradas 15 imagem(ns)
+   ✅ 15 imagem(ns) adicionadas
+
+📁 Processando pasta 2/3: Capítulo 2
+   🖼️ Encontradas 18 imagem(ns)
+   ✅ 18 imagem(ns) adicionadas
+
+📁 Processando pasta 3/3: Capítulo 3
+   🖼️ Encontradas 22 imagem(ns)
+   ✅ 22 imagem(ns) adicionadas
+
+🎯 Total de imagens coletadas: 55
+
+📚 Criando EPUB unificado...
+   📁 Criando estrutura EPUB...
+   🖼️ Copiando imagens...
+   📄 Copiadas 25/55 imagens
+   📄 Copiadas 50/55 imagens
+   📄 Copiadas 55/55 imagens
+   📄 Criando páginas HTML...
+   📝 Criadas 50/55 páginas HTML
+   📝 Criadas 55/55 páginas HTML
+   📋 Criando manifest...
+   🗂️ Criando índice de navegação...
+   📦 Compactando EPUB...
+
+📊 Estatísticas do processamento:
+   📂 Pastas processadas: 3
+   🖼️ Total de imagens: 55
+
+   📈 Imagens por pasta:
+     • Capítulo 1: 15 imagem(ns)
+     • Capítulo 2: 18 imagem(ns)
+     • Capítulo 3: 22 imagem(ns)
+
+   📚 Arquivo de saída: /home/user/projeto/epub/manga-completo.epub
+   📄 Total de páginas no EPUB: 55
+
+✅ Fusão de EPUB concluída com sucesso!
+🎉 Arquivo unificado salvo em: /home/user/projeto/epub/manga-completo.epub
+```
+
+**Características especiais do EPUB fusionado**:
+- 📖 **Navegação hierárquica** - Cada pasta vira um capítulo no índice
+- 🏷️ **Identificação de páginas** - Cada página mostra o capítulo e número
+- �️ **Índice organizado** - Estrutura: Capítulo > Páginas
+- 📱 **Compatibilidade** - Funciona em todos os leitores de EPUB
+- 💾 **Eficiência** - Arquivo único, menor overhead
+
+## �🔗 Como os modos se conectam
+
+O sistema oferere **6 modos diferentes** que podem ser usados conforme sua necessidade:
 
 ### 📊 **Modo 1 - Análise** (`analizer.js`)
 - **Entrada**: Um diretório com várias pastas
