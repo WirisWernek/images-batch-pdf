@@ -17,7 +17,7 @@ Este projeto oferece uma solução completa para converter múltiplas pastas con
 - 📊 **Geração de CSV**: Cria arquivos de controle para processamento em lote
 - �️ **Conversão de imagens**: Transforma imagens numeradas em PDFs
 - 📋 **Processamento em lote**: Converte múltiplas pastas de uma só vez
-- 🔄 **Quatro modos de operação**: Análise, conversão individual, conversão em lote e fusão em PDF único
+- 🔄 **Cinco modos de operação**: Análise, conversão individual, conversão em lote, fusão em PDF único e conversão para EPUB
 - ✅ **Ordenação inteligente**: Organiza imagens numericamente (1, 2, 3, ..., 10, 11)
 - 🎯 **Preservação de qualidade**: Mantém a qualidade original das imagens
 
@@ -47,7 +47,7 @@ npm install
 mkdir -p csv pdf
 ```
 
-## 🛠️ Como usar - Quatro modos de operação
+## 🛠️ Como usar - Cinco modos de operação
 
 ### Modo 1: 📊 Análise de Pastas (`analizer.js`)
 
@@ -203,6 +203,54 @@ npm run merge meu-arquivo.csv relatorio-unificado.pdf
 🎉 Arquivo unificado salvo em: /home/user/projeto/pdf/documento-completo.pdf
 ```
 
+### Modo 5: 📚 Conversão para EPUB (`epub-converter.js`)
+
+**O que faz**: Converte imagens de pastas em livros eletrônicos no formato EPUB, compatível com leitores de e-book.
+
+**Quando usar**: Quando você quer criar livros eletrônicos para ler em dispositivos como Kindle, tablets ou aplicativos de leitura.
+
+```bash
+# Modo individual - uma pasta para um EPUB
+npm run epub /caminho/da/pasta nome-do-livro
+
+# Modo lote - usando CSV do analizer
+npm run epub csv/arquivo.csv
+
+# Exemplo prático
+npm run epub /home/usuario/manga/volume1 manga-vol1.epub
+```
+
+**Exemplo de saída no terminal**:
+```
+📚 Iniciando conversão de imagens para EPUB...
+
+📁 Pasta: /home/usuario/manga/volume1
+📚 Arquivo de saída: manga-vol1
+
+📖 Lendo arquivos da pasta...
+Encontrados 20 arquivo(s) de imagem
+
+🔍 Validando arquivos...
+
+📚 Criando EPUB...
+   📁 Criando estrutura EPUB...
+   🖼️ Copiando imagens...
+   📄 Criando páginas HTML...
+   📋 Criando manifest...
+   🗂️ Criando índice...
+   📦 Compactando EPUB...
+
+✅ Conversão concluída com sucesso!
+📚 Arquivo salvo em: /home/user/projeto/epub/manga-vol1.epub
+```
+
+**Características do EPUB**:
+- ✅ **Padrão aberto** - Compatível com a maioria dos leitores
+- ✅ **Navegação** - Índice automático para pular entre páginas
+- ✅ **Metadados** - Título, autor, data de criação incluídos
+- ✅ **Responsivo** - Adapta-se ao tamanho da tela do dispositivo
+- ✅ **Leve** - Compactação eficiente das imagens
+
 ## 🔗 Como os modos se conectam
 
 O sistema oferece **4 modos diferentes** que podem ser usados conforme sua necessidade:
@@ -337,15 +385,19 @@ images-batch-pdf/
 ├── analizer.js           # Script de análise de pastas
 ├── proccess.js          # Script de conversão para PDF  
 ├── merge-pdf.js         # Script de fusão em PDF único
+├── epub-converter.js    # Script de conversão para EPUB
 ├── package.json         # Configurações e dependências
 ├── readme.md           # Esta documentação
 ├── .gitignore          # Arquivos ignorados pelo Git
 ├── csv/                # Pasta onde ficam os arquivos CSV
 │   ├── arquivo1.csv
 │   └── arquivo2.csv
-└── pdf/                # Pasta onde ficam os PDFs gerados
-    ├── documento1.pdf
-    └── documento2.pdf
+├── pdf/                # Pasta onde ficam os PDFs gerados
+│   ├── documento1.pdf
+│   └── documento2.pdf
+└── epub/               # Pasta onde ficam os EPUBs gerados
+    ├── livro1.epub
+    └── livro2.epub
 ```
 
 ## ⚠️ Coisas importantes para saber
@@ -391,6 +443,10 @@ npm run proccess csv/nome-do-arquivo.csv
 
 # Fusão de múltiplas pastas em PDF único
 npm run merge csv/nome-do-arquivo.csv documento-unificado
+
+# Conversão para EPUB (livro eletrônico)
+npm run epub /pasta/com/imagens nome-do-livro
+npm run epub csv/nome-do-arquivo.csv
 ```
 
 ## 👨‍💻 Desenvolvido por

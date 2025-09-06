@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "analize": "node analizer.js",
     "proccess": "node proccess.js",
-    "merge": "node merge-pdf.js"
+    "merge": "node merge-pdf.js",
+    "epub": "node epub-converter.js"
   },
   "keywords": [
     "pdf",

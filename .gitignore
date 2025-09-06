@@ -147,6 +147,7 @@ dist
 *.csv
 csv/*
 pdf/*
+epub/*
 *.zip
 *.tar.gz
 *.tgz
