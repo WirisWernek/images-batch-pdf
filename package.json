@@ -2,15 +2,15 @@
   "name": "images-batch-pdf",
   "version": "1.0.0",
   "description": "Sistema para análise de pastas e conversão de imagens em PDF de forma automatizada",
-  "main": "proccess.js",
+  "main": "gen-pdf.js",
   "scripts": {
-    "start": "node proccess.js",
+    "start": "node gen-pdf.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "analize": "node analizer.js",
-    "proccess": "node proccess.js",
-    "merge": "node merge-pdf.js",
-    "epub": "node epub-converter.js",
-    "merge-epub": "node merge-epub.js"
+    "gen-pdf": "node gen-pdf.js",
+    "gen-lote-pdf": "node gen-lote-pdf.js",
+    "gen-epub": "node gen-epub.js",
+    "gen-lote-epub": "node gen-lote-epub.js"
   },
   "keywords": [
     "pdf",

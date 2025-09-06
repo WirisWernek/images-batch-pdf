@@ -6,9 +6,9 @@ const path = require('path');
 const crypto = require('crypto');
 
 /**
- * Classe para conversão de múltiplas pastas de imagens em um único EPUB
+ * Classe principal do CLI para conversão de imagens em EPUB
  */
-class MergeEpubConverter {
+class ImageToEpubConverter {
   constructor() {
     this.supportedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
   }
@@ -19,18 +19,24 @@ class MergeEpubConverter {
    * @returns {Object} Objeto com dados validados
    */
   validateArguments(args) {
-    if (args.length < 4) {
-      throw new Error('Uso: node merge-epub.js <arquivo-csv> <nome-do-arquivo-epub>');
+    if (args.length < 3) {
+      throw new Error('Uso: node gen-epub.js <caminho-da-pasta> <nome-do-arquivo-epub> OU node gen-epub.js <arquivo-csv>');
     }
 
-    const csvFile = args[2];
+    // Se há apenas um argumento, assume que é um arquivo CSV
+    if (args.length === 3) {
+      return { csvFile: args[2], mode: 'csv' };
+    }
+
+    // Se há dois argumentos, assume modo pasta + nome
+    const folderPath = args[2];
     const outputName = args[3];
 
     if (!outputName) {
-      throw new Error('Nome do arquivo EPUB de saída é obrigatório');
+      throw new Error('Nome do arquivo EPUB é obrigatório');
     }
 
-    return { csvFile, outputName };
+    return { folderPath, outputName, mode: 'single' };
   }
 
   /**
@@ -89,7 +95,7 @@ class MergeEpubConverter {
   }
 
   /**
-   * Faz parse de uma linha CSV considerando aspas e usando ponto e vírgula como separador
+   * Faz parse de uma linha CSV considerando aspas
    * @param {string} line - Linha do CSV
    * @returns {string[]} Array com as colunas
    */
@@ -147,6 +153,10 @@ class MergeEpubConverter {
         return this.supportedExtensions.includes(ext);
       });
 
+      if (imageFiles.length === 0) {
+        throw new Error('Nenhum arquivo de imagem encontrado na pasta');
+      }
+
       return imageFiles;
     } catch (error) {
       throw new Error(`Erro ao ler pasta: ${error.message}`);
@@ -170,75 +180,6 @@ class MergeEpubConverter {
       
       return numA - numB;
     });
-  }
-
-  /**
-   * Coleta todas as imagens de todas as pastas listadas no CSV
-   * @param {Array} entries - Array de objetos com nome e caminho
-   * @returns {Promise<Array>} Array com objetos contendo informações das imagens
-   */
-  async collectAllImages(entries) {
-    console.log(`📋 Coletando imagens de ${entries.length} pasta(s)...\n`);
-    
-    const allImages = [];
-    
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
-      const { nome, caminho } = entry;
-      
-      console.log(`📁 Processando pasta ${i + 1}/${entries.length}: ${nome}`);
-      
-      try {
-        // Valida se a pasta existe
-        await this.validateFolder(caminho);
-        
-        // Lê arquivos de imagem da pasta
-        const imageFiles = await this.readImageFiles(caminho);
-        
-        if (imageFiles.length === 0) {
-          console.warn(`   ⚠️ Nenhuma imagem encontrada em: ${caminho}`);
-          continue;
-        }
-        
-        console.log(`   🖼️ Encontradas ${imageFiles.length} imagem(ns)`);
-        
-        // Ordena arquivos numericamente
-        const sortedFiles = this.sortFilesNumerically(imageFiles);
-        
-        // Cria objetos com informações das imagens
-        const imagesInfo = sortedFiles.map((file, index) => ({
-          path: path.join(caminho, file),
-          filename: file,
-          folderName: nome,
-          folderIndex: i + 1,
-          imageIndex: index + 1,
-          totalInFolder: sortedFiles.length
-        }));
-        
-        // Valida se todos os arquivos existem
-        for (const imageInfo of imagesInfo) {
-          try {
-            await fsPromises.access(imageInfo.path);
-          } catch (error) {
-            throw new Error(`Arquivo não encontrado: ${imageInfo.path}`);
-          }
-        }
-        
-        allImages.push(...imagesInfo);
-        console.log(`   ✅ ${imagesInfo.length} imagem(ns) adicionadas`);
-        
-      } catch (error) {
-        console.error(`   ❌ Erro ao processar pasta ${nome}: ${error.message}`);
-        // Continue com a próxima pasta em caso de erro
-      }
-    }
-    
-    if (allImages.length === 0) {
-      throw new Error('Nenhuma imagem foi encontrada em todas as pastas especificadas');
-    }
-    
-    console.log(`\n🎯 Total de imagens coletadas: ${allImages.length}`);
-    return allImages;
   }
 
   /**
@@ -284,21 +225,21 @@ class MergeEpubConverter {
 
   /**
    * Copia imagens para o EPUB e retorna lista de arquivos
-   * @param {Array} allImages - Array com informações das imagens
+   * @param {string[]} imagePaths - Caminhos das imagens
    * @param {string} tempDir - Diretório temporário
-   * @returns {Promise<Array>} Lista de informações das imagens no EPUB
+   * @returns {Promise<Array>} Lista de informações das imagens
    */
-  async copyImagesToEpub(allImages, tempDir) {
+  async copyImagesToEpub(imagePaths, tempDir) {
     const imageList = [];
     
-    for (let i = 0; i < allImages.length; i++) {
-      const imageInfo = allImages[i];
-      const ext = path.extname(imageInfo.path).toLowerCase();
-      const newFileName = `image_${String(i + 1).padStart(4, '0')}${ext}`;
+    for (let i = 0; i < imagePaths.length; i++) {
+      const imagePath = imagePaths[i];
+      const ext = path.extname(imagePath).toLowerCase();
+      const newFileName = `image_${String(i + 1).padStart(3, '0')}${ext}`;
       const destPath = path.join(tempDir, 'OEBPS', 'images', newFileName);
       
       // Copia a imagem
-      await fsPromises.copyFile(imageInfo.path, destPath);
+      await fsPromises.copyFile(imagePath, destPath);
       
       // Determina o media type
       let mediaType = 'image/jpeg';
@@ -313,14 +254,8 @@ class MergeEpubConverter {
         filename: newFileName,
         id: `img${i + 1}`,
         mediaType: mediaType,
-        pageNumber: i + 1,
-        originalInfo: imageInfo
+        pageNumber: i + 1
       });
-      
-      // Log de progresso a cada 25 imagens ou para a última
-      if ((i + 1) % 25 === 0 || i === allImages.length - 1) {
-        console.log(`   📄 Copiadas ${i + 1}/${allImages.length} imagens`);
-      }
     }
     
     return imageList;
@@ -332,67 +267,31 @@ class MergeEpubConverter {
    * @param {string} tempDir - Diretório temporário
    */
   async createHtmlPages(imageList, tempDir) {
-    for (let i = 0; i < imageList.length; i++) {
-      const image = imageList[i];
-      const folderInfo = image.originalInfo;
-      
-      // Título da página incluindo informação da pasta original
-      const pageTitle = `${folderInfo.folderName} - Página ${folderInfo.imageIndex}`;
-      
+    for (const image of imageList) {
       const htmlContent = `<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>${pageTitle}</title>
+  <title>Página ${image.pageNumber}</title>
   <style type="text/css">
-    body { 
-      margin: 0; 
-      padding: 0; 
-      text-align: center; 
-      background-color: #fff;
-    }
-    .page-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    .page-header {
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 10px;
-      padding: 5px;
-    }
-    img { 
-      max-width: 100%; 
-      max-height: 90vh;
-      height: auto;
-      display: block;
-    }
+    body { margin: 0; padding: 0; text-align: center; }
+    img { max-width: 100%; max-height: 100vh; }
   </style>
 </head>
 <body>
-  <div class="page-container">
-    <div class="page-header">${pageTitle}</div>
-    <img src="../images/${image.filename}" alt="${pageTitle}"/>
+  <div>
+    <img src="../images/${image.filename}" alt="Página ${image.pageNumber}"/>
   </div>
 </body>
 </html>`;
       
-      const htmlFileName = `page_${String(image.pageNumber).padStart(4, '0')}.xhtml`;
+      const htmlFileName = `page_${String(image.pageNumber).padStart(3, '0')}.xhtml`;
       await fsPromises.writeFile(
         path.join(tempDir, 'OEBPS', 'text', htmlFileName),
         htmlContent
       );
       
       image.htmlFile = htmlFileName;
-      
-      // Log de progresso a cada 50 páginas ou para a última
-      if ((i + 1) % 50 === 0 || i === imageList.length - 1) {
-        console.log(`   📝 Criadas ${i + 1}/${imageList.length} páginas HTML`);
-      }
     }
   }
 
@@ -422,11 +321,10 @@ class MergeEpubConverter {
     <dc:identifier id="BookId" opf:scheme="UUID">${uuid}</dc:identifier>
     <dc:title>${title}</dc:title>
     <dc:language>pt-BR</dc:language>
-    <dc:creator opf:file-as="Merge EPUB Converter" opf:role="aut">Merge EPUB Converter</dc:creator>
+    <dc:creator opf:file-as="Images Batch EPUB" opf:role="aut">Images Batch EPUB</dc:creator>
     <dc:date opf:event="creation">${now}</dc:date>
     <dc:publisher>Images Batch EPUB Converter</dc:publisher>
     <dc:rights>Todos os direitos reservados</dc:rights>
-    <dc:description>EPUB gerado a partir de múltiplas pastas de imagens</dc:description>
     <meta name="cover" content="img1"/>
   </metadata>
   <manifest>
@@ -451,46 +349,15 @@ ${spine}  </spine>
    */
   async createTocNcx(imageList, tempDir, title, uuid) {
     let navPoints = '';
-    let currentFolder = '';
-    let folderNavPoint = 1;
-    let pageOrder = 1;
     
     for (const image of imageList) {
-      const folderInfo = image.originalInfo;
-      
-      // Se mudou de pasta, cria um novo ponto de navegação para a pasta
-      if (folderInfo.folderName !== currentFolder) {
-        currentFolder = folderInfo.folderName;
-        
-        navPoints += `    <navPoint id="folder-${folderNavPoint}" playOrder="${pageOrder}">
+      navPoints += `    <navPoint id="navpoint-${image.pageNumber}" playOrder="${image.pageNumber}">
       <navLabel>
-        <text>${folderInfo.folderName}</text>
+        <text>Página ${image.pageNumber}</text>
       </navLabel>
       <content src="text/${image.htmlFile}"/>
+    </navPoint>
 `;
-        
-        // Adiciona sub-navegação para as páginas da pasta
-        const folderImages = imageList.filter(img => img.originalInfo.folderName === currentFolder);
-        
-        for (let i = 0; i < folderImages.length; i++) {
-          const folderImg = folderImages[i];
-          pageOrder++;
-          
-          navPoints += `      <navPoint id="page-${folderImg.pageNumber}" playOrder="${pageOrder}">
-        <navLabel>
-          <text>Página ${folderImg.originalInfo.imageIndex}</text>
-        </navLabel>
-        <content src="text/${folderImg.htmlFile}"/>
-      </navPoint>
-`;
-        }
-        
-        navPoints += `    </navPoint>
-`;
-        
-        folderNavPoint++;
-        pageOrder++; // Incrementa para a próxima pasta
-      }
     }
 
     const tocNcx = `<?xml version="1.0" encoding="utf-8"?>
@@ -498,9 +365,9 @@ ${spine}  </spine>
 <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
   <head>
     <meta name="dtb:uid" content="${uuid}"/>
-    <meta name="dtb:depth" content="2"/>
-    <meta name="dtb:totalPageCount" content="${imageList.length}"/>
-    <meta name="dtb:maxPageNumber" content="${imageList.length}"/>
+    <meta name="dtb:depth" content="1"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
   </head>
   <docTitle>
     <text>${title}</text>
@@ -558,13 +425,13 @@ ${navPoints}  </navMap>
   }
 
   /**
-   * Cria um documento EPUB unificado com todas as imagens coletadas
-   * @param {Array} allImages - Array com informações de todas as imagens
+   * Cria um documento EPUB com as imagens
+   * @param {string[]} imagePaths - Lista de caminhos completos das imagens
    * @param {string} outputPath - Caminho de saída do EPUB
    * @param {string} title - Título do livro
    */
-  async createMergedEpub(allImages, outputPath, title) {
-    const tempDir = path.join(__dirname, 'temp_epub_merge_' + Date.now());
+  async createEpub(imagePaths, outputPath, title) {
+    const tempDir = path.join(__dirname, 'temp_epub_' + Date.now());
     
     try {
       // Cria estrutura temporária
@@ -572,12 +439,11 @@ ${navPoints}  </navMap>
       
       const uuid = this.generateUUID();
       
-      console.log('\n📚 Criando EPUB unificado...');
       console.log('   📁 Criando estrutura EPUB...');
       await this.createEpubStructure(tempDir, title, uuid);
       
       console.log('   🖼️ Copiando imagens...');
-      const imageList = await this.copyImagesToEpub(allImages, tempDir);
+      const imageList = await this.copyImagesToEpub(imagePaths, tempDir);
       
       console.log('   📄 Criando páginas HTML...');
       await this.createHtmlPages(imageList, tempDir);
@@ -585,7 +451,7 @@ ${navPoints}  </navMap>
       console.log('   📋 Criando manifest...');
       await this.createContentOpf(imageList, tempDir, title, uuid);
       
-      console.log('   🗂️ Criando índice de navegação...');
+      console.log('   🗂️ Criando índice...');
       await this.createTocNcx(imageList, tempDir, title, uuid);
       
       console.log('   📦 Compactando EPUB...');
@@ -602,35 +468,58 @@ ${navPoints}  </navMap>
   }
 
   /**
-   * Exibe estatísticas do processamento
-   * @param {Array} allImages - Array com informações de todas as imagens
-   * @param {Array} entries - Array de entradas do CSV
-   * @param {string} outputPath - Caminho do arquivo de saída
+   * Processa múltiplas pastas a partir de um arquivo CSV
+   * @param {Array} entries - Array de objetos com nome e caminho
    */
-  displayStatistics(allImages, entries, outputPath) {
-    console.log('\n📊 Estatísticas do processamento:');
-    console.log(`   📂 Pastas processadas: ${entries.length}`);
-    console.log(`   🖼️ Total de imagens: ${allImages.length}`);
+  async processCsvEntries(entries) {
+    console.log(`📋 Processando ${entries.length} entrada(s) do CSV...\n`);
     
-    // Estatísticas por pasta
-    const folderStats = {};
-    allImages.forEach(img => {
-      if (!folderStats[img.folderName]) {
-        folderStats[img.folderName] = 0;
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const { nome, caminho } = entry;
+      
+      console.log(`\n📁 Processando ${i + 1}/${entries.length}`);
+      
+      try {
+        // Valida se a pasta existe
+        await this.validateFolder(caminho);
+        
+        // Lê arquivos de imagem da pasta
+        const imageFiles = await this.readImageFiles(caminho);
+        console.log(`   🖼️ Encontradas ${imageFiles.length} imagem(ns)`);
+        
+        // Ordena arquivos numericamente
+        const sortedFiles = this.sortFilesNumerically(imageFiles);
+        
+        // Cria caminhos completos
+        const imagePaths = sortedFiles.map(file => path.join(caminho, file));
+        
+        // Valida se todos os arquivos existem
+        for (const imagePath of imagePaths) {
+          try {
+            await fsPromises.access(imagePath);
+          } catch (error) {
+            throw new Error(`Arquivo não encontrado: ${imagePath}`);
+          }
+        }
+        
+        // Define nome do arquivo de saída
+        const outputFileName = nome.endsWith('.epub') ? `epub/${nome}` : `epub/${nome}.epub`;
+        const outputPath = path.resolve(outputFileName);
+        
+        // Garante que a pasta epub existe
+        await fsPromises.mkdir('epub', { recursive: true });
+        
+        // Cria o EPUB
+        console.log(`   📚 Criando EPUB: ${outputFileName}`);
+        await this.createEpub(imagePaths, outputPath, nome);
+        console.log(`   ✅ EPUB criado: ${outputPath}`);
+        
+      } catch (error) {
+        console.error(`   ❌ Erro ao processar ${nome}: ${error.message}`);
+        // Continue com o próximo arquivo em caso de erro
       }
-      folderStats[img.folderName]++;
-    });
-    
-    console.log('\n   📈 Imagens por pasta:');
-    Object.entries(folderStats).forEach(([folderName, count]) => {
-      console.log(`     • ${folderName}: ${count} imagem(ns)`);
-    });
-    
-    console.log(`\n   📚 Arquivo de saída: ${outputPath}`);
-    
-    // Estimativa do tamanho do arquivo
-    const totalPages = allImages.length;
-    console.log(`   📄 Total de páginas no EPUB: ${totalPages}`);
+    }
   }
 
   /**
@@ -639,42 +528,72 @@ ${navPoints}  </navMap>
    */
   async run(args) {
     try {
-      console.log('📚 Iniciando fusão de imagens de múltiplas pastas em EPUB único...\n');
+      console.log('📚 Iniciando conversão de imagens para EPUB...\n');
       
       // Valida argumentos
-      const { csvFile, outputName } = this.validateArguments(args);
+      const params = this.validateArguments(args);
       
-      console.log(`📄 Arquivo CSV: ${csvFile}`);
-      console.log(`📚 Arquivo de saída: ${outputName}\n`);
-      
-      // Valida se o arquivo CSV existe
-      try {
-        await fsPromises.access(csvFile);
-      } catch (error) {
-        throw new Error(`Arquivo CSV não encontrado: ${csvFile}`);
+      if (params.mode === 'csv') {
+        // Modo CSV - processa múltiplas pastas
+        console.log(`📄 Arquivo CSV: ${params.csvFile}\n`);
+        
+        // Valida se o arquivo CSV existe
+        try {
+          await fsPromises.access(params.csvFile);
+        } catch (error) {
+          throw new Error(`Arquivo CSV não encontrado: ${params.csvFile}`);
+        }
+        
+        // Lê e processa o arquivo CSV
+        const entries = await this.readCsvFile(params.csvFile);
+        await this.processCsvEntries(entries);
+        
+        console.log('\n🎉 Processamento do CSV concluído!');
+        
+      } else {
+        // Modo single - uma pasta e um arquivo
+        const { folderPath, outputName } = params;
+        console.log(`📁 Pasta: ${folderPath}`);
+        console.log(`📚 Arquivo de saída: ${outputName}\n`);
+        
+        // Valida se a pasta existe
+        await this.validateFolder(folderPath);
+        
+        // Lê arquivos de imagem da pasta
+        console.log('📖 Lendo arquivos da pasta...');
+        const imageFiles = await this.readImageFiles(folderPath);
+        console.log(`Encontrados ${imageFiles.length} arquivo(s) de imagem`);
+        
+        // Ordena arquivos numericamente
+        const sortedFiles = this.sortFilesNumericamente(imageFiles);
+        
+        // Cria caminhos completos
+        const imagePaths = sortedFiles.map(file => path.join(folderPath, file));
+        
+        // Valida se todos os arquivos existem
+        console.log('\n🔍 Validando arquivos...');
+        for (const imagePath of imagePaths) {
+          try {
+            await fsPromises.access(imagePath);
+          } catch (error) {
+            throw new Error(`Arquivo não encontrado: ${imagePath}`);
+          }
+        }
+        
+        // Define nome do arquivo de saída
+        const outputFileName = outputName.endsWith('.epub') ? outputName : `${outputName}.epub`;
+        const outputPath = path.resolve('epub', outputFileName);
+        
+        // Garante que a pasta epub existe
+        await fsPromises.mkdir('epub', { recursive: true });
+        
+        // Cria o EPUB
+        console.log('\n📚 Criando EPUB...');
+        await this.createEpub(imagePaths, outputPath, outputName);
+        
+        console.log('\n✅ Conversão concluída com sucesso!');
+        console.log(`📚 Arquivo salvo em: ${outputPath}`);
       }
-      
-      // Lê e processa o arquivo CSV
-      const entries = await this.readCsvFile(csvFile);
-      
-      // Coleta todas as imagens de todas as pastas
-      const allImages = await this.collectAllImages(entries);
-      
-      // Define nome do arquivo de saída
-      const outputFileName = outputName.endsWith('.epub') ? outputName : `${outputName}.epub`;
-      const outputPath = path.resolve('epub', outputFileName);
-      
-      // Garante que a pasta 'epub' existe
-      await fsPromises.mkdir('epub', { recursive: true });
-      
-      // Cria o EPUB unificado
-      await this.createMergedEpub(allImages, outputPath, outputName);
-      
-      // Exibe estatísticas
-      this.displayStatistics(allImages, entries, outputPath);
-      
-      console.log('\n✅ Fusão de EPUB concluída com sucesso!');
-      console.log(`🎉 Arquivo unificado salvo em: ${outputPath}`);
       
     } catch (error) {
       console.error('\n❌ Erro:', error.message);
@@ -688,70 +607,54 @@ ${navPoints}  </navMap>
  */
 function showHelp() {
   console.log(`
-📚 Conversor de Múltiplas Pastas para EPUB Único
-
-Descrição:
-  Este script lê um arquivo CSV contendo múltiplas pastas com imagens
-  e gera um único arquivo EPUB com todas as imagens organizadas em sequência.
+📚 Conversor de Imagens para EPUB
 
 Uso:
-  node merge-epub.js <arquivo-csv> <nome-do-arquivo-epub>
+  node gen-epub.js <caminho-da-pasta> <nome-do-arquivo-epub>
+  node gen-epub.js <arquivo-csv>
 
 Argumentos:
-  arquivo-csv          Caminho para arquivo CSV com as pastas (formato do analizer.js)
-  nome-do-arquivo-epub Nome do arquivo EPUB único de saída (com ou sem extensão .epub)
+  caminho-da-pasta     Caminho para a pasta contendo as imagens
+  nome-do-arquivo-epub Nome do arquivo EPUB de saída (com ou sem extensão .epub)
+  arquivo-csv          Caminho para arquivo CSV com múltiplas conversões
 
 Formato do CSV:
-  O arquivo CSV deve estar no formato gerado pelo analizer.js:
-  nome;caminho
+  O arquivo CSV deve ter duas colunas: nome;caminho
+  - nome: Nome do arquivo EPUB a ser gerado
+  - caminho: Caminho da pasta contendo as imagens
   
-  Exemplo:
+  Exemplo do CSV:
   nome;caminho
-  Capítulo 1;/caminho/para/capitulo1
-  Capítulo 2;/caminho/para/capitulo2
-  Capítulo 3;/caminho/para/capitulo3
+  documento1;/pasta/imagens1
+  "Relatório Final";/pasta/imagens2
+  album-familia.epub;"/pasta/com espaços"
 
 Exemplos:
-  # Usando CSV gerado pelo analizer
-  node merge-epub.js csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv manga-completo
-  
-  # Especificando nome com extensão
-  node merge-epub.js meu-arquivo.csv historia-completa.epub
+  # Modo individual - uma pasta
+  node gen-epub.js ./imagens meu-livro
+  node gen-epub.js /home/user/fotos album-familia.epub
+  node gen-epub.js "C:\\Users\\Nome\\Pictures" relatorio
 
-Funcionamento:
-  1. Lê o arquivo CSV especificado
-  2. Percorre todas as pastas listadas no CSV
-  3. Coleta todas as imagens de todas as pastas
-  4. Ordena as imagens numericamente dentro de cada pasta
-  5. Cria um único EPUB com todas as imagens organizadas por capítulos
-  6. Mantém a ordem: Pasta1 (imgs 1,2,3...), Pasta2 (imgs 1,2,3...), etc.
-  7. Gera índice de navegação organizado por pastas
+  # Modo lote - múltiplas pastas via CSV
+  node gen-epub.js ./conversoes.csv
+  node gen-epub.js /path/to/batch-conversion.csv
 
-Estrutura do EPUB:
-  - Cada pasta original vira um "capítulo" no índice
-  - Cada imagem vira uma página no EPUB
-  - Páginas incluem título com nome da pasta e número da página
-  - Navegação hierárquica: Pasta > Páginas
-  - Compatível com leitores de e-book padrão
-
-Formatos de imagem suportados:
+Formatos suportados:
   JPG, JPEG, PNG, GIF, BMP, WEBP
 
 Observações:
   - As imagens devem estar nomeadas numericamente (1.jpg, 2.png, etc.)
-  - Cada imagem ocupará uma página completa no EPUB
+  - Cada imagem será uma página do livro EPUB
   - A qualidade e formato das imagens são preservados
-  - Se uma pasta não contém imagens, ela é ignorada
-  - O arquivo é salvo na pasta 'epub/' do projeto
+  - No modo CSV, se um erro ocorrer em uma conversão, as outras continuam
   - Requer o comando 'zip' instalado no sistema
-  - Exibe estatísticas detalhadas ao final do processamento
+  - Os arquivos são salvos na pasta 'epub/' do projeto
   
-Vantagens do EPUB:
-  - Menor tamanho de arquivo comparado ao PDF
-  - Melhor para leitura em dispositivos móveis
-  - Suporte a índice de navegação
+Sobre EPUB:
+  - EPUB é um formato padrão de livro eletrônico
   - Compatível com a maioria dos leitores de e-book
-  - Permite zoom e ajustes de visualização
+  - Permite navegação entre páginas
+  - Suporta índice e metadados
   `);
 }
 
@@ -765,8 +668,8 @@ if (require.main === module) {
     process.exit(0);
   }
   
-  const converter = new MergeEpubConverter();
+  const converter = new ImageToEpubConverter();
   converter.run(args);
 }
 
-module.exports = MergeEpubConverter;
+module.exports = ImageToEpubConverter;

@@ -20,7 +20,7 @@ class ImageToPdfConverter {
    */
   validateArguments(args) {
     if (args.length < 3) {
-      throw new Error('Uso: node script.js <caminho-da-pasta> <nome-do-arquivo-pdf> OU node script.js <arquivo-csv>');
+      throw new Error('Uso: node gen-pdf.js <caminho-da-pasta> <nome-do-arquivo-pdf> OU node gen-pdf.js <arquivo-csv>');
     }
 
     // Se há apenas um argumento, assume que é um arquivo CSV
@@ -388,8 +388,8 @@ function showHelp() {
 📖 Conversor de Imagens para PDF
 
 Uso:
-  node script.js <caminho-da-pasta> <nome-do-arquivo-pdf>
-  node script.js <arquivo-csv>
+  node gen-pdf.js <caminho-da-pasta> <nome-do-arquivo-pdf>
+  node gen-pdf.js <arquivo-csv>
 
 Argumentos:
   caminho-da-pasta     Caminho para a pasta contendo as imagens
@@ -397,25 +397,25 @@ Argumentos:
   arquivo-csv          Caminho para arquivo CSV com múltiplas conversões
 
 Formato do CSV:
-  O arquivo CSV deve ter duas colunas: nome,caminho
+  O arquivo CSV deve ter duas colunas: nome;caminho
   - nome: Nome do arquivo PDF a ser gerado
   - caminho: Caminho da pasta contendo as imagens
   
   Exemplo do CSV:
-  nome,caminho
-  documento1,/pasta/imagens1
-  "Relatório Final",/pasta/imagens2
-  album-familia.pdf,"C:\\Users\\Nome\\Pictures"
+  nome;caminho
+  documento1;/pasta/imagens1
+  "Relatório Final";/pasta/imagens2
+  album-familia.pdf;"/pasta/com espaços"
 
 Exemplos:
-  # Modo single - uma pasta
-  node script.js ./imagens meu-documento
-  node script.js /home/user/fotos album-familia.pdf
-  node script.js "C:\\Users\\Nome\\Pictures" relatorio
+  # Modo individual - uma pasta
+  node gen-pdf.js ./imagens meu-documento
+  node gen-pdf.js /home/user/fotos album-familia.pdf
+  node gen-pdf.js "C:\\Users\\Nome\\Pictures" relatorio
 
-  # Modo CSV - múltiplas pastas
-  node script.js ./conversoes.csv
-  node script.js /path/to/batch-conversion.csv
+  # Modo lote - múltiplas pastas via CSV
+  node gen-pdf.js ./conversoes.csv
+  node gen-pdf.js /path/to/batch-conversion.csv
 
 Formatos suportados:
   JPG, JPEG, PNG, GIF, BMP, WEBP

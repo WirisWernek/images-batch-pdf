@@ -20,7 +20,7 @@ class MergePdfConverter {
    */
   validateArguments(args) {
     if (args.length < 4) {
-      throw new Error('Uso: node merge-pdf.js <arquivo-csv> <nome-do-arquivo-pdf>');
+      throw new Error('Uso: node gen-lote-pdf.js <arquivo-csv> <nome-do-arquivo-pdf>');
     }
 
     const csvFile = args[2];
@@ -386,7 +386,7 @@ Descrição:
   e gera um único arquivo PDF com todas as imagens em sequência.
 
 Uso:
-  node merge-pdf.js <arquivo-csv> <nome-do-arquivo-pdf>
+  node gen-lote-pdf.js <arquivo-csv> <nome-do-arquivo-pdf>
 
 Argumentos:
   arquivo-csv          Caminho para arquivo CSV com as pastas (formato do analizer.js)
@@ -404,10 +404,10 @@ Formato do CSV:
 
 Exemplos:
   # Usando CSV gerado pelo analizer
-  node merge-pdf.js csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv documento-completo
+  node gen-lote-pdf.js csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv documento-completo
   
   # Especificando nome com extensão
-  node merge-pdf.js meu-arquivo.csv relatorio-final.pdf
+  node gen-lote-pdf.js meu-arquivo.csv relatorio-final.pdf
 
 Funcionamento:
   1. Lê o arquivo CSV especificado
