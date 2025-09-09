@@ -358,16 +358,9 @@ class MergeEpubConverter {
       justify-content: center;
       min-height: 100vh;
     }
-    .page-header {
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 10px;
-      padding: 5px;
-    }
     img { 
       max-width: 100%; 
-      max-height: 90vh;
+      max-height: 100vh;
       height: auto;
       display: block;
     }
@@ -375,7 +368,6 @@ class MergeEpubConverter {
 </head>
 <body>
   <div class="page-container">
-    <div class="page-header">${pageTitle}</div>
     <img src="../images/${image.filename}" alt="${pageTitle}"/>
   </div>
 </body>
