@@ -277,6 +277,30 @@
             margin-top: 2px;
         }
 
+        .form-group input[required] {
+            border-left: 4px solid #ffc107;
+        }
+
+        .form-group input[required]:valid {
+            border-left: 4px solid #28a745;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .help-text {
+            background: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            color: #0c5460;
+        }
+
         .btn {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
@@ -388,8 +412,8 @@
 
                 <div class="function-card" onclick="selectFunction('pdf-batch')">
                     <span class="icon">📚</span>
-                    <h3>Gerar PDFs em Lote</h3>
-                    <p>Processa um arquivo CSV e converte múltiplas pastas de imagens em arquivos PDF separados.</p>
+                    <h3>Mesclar PDF em Lote</h3>
+                    <p>Processa um arquivo CSV e mescla múltiplas pastas de imagens em um único arquivo PDF.</p>
                 </div>
 
                 <div class="function-card" onclick="selectFunction('epub-single')">
@@ -400,8 +424,8 @@
 
                 <div class="function-card" onclick="selectFunction('epub-batch')">
                     <span class="icon">📚</span>
-                    <h3>Gerar EPUBs em Lote</h3>
-                    <p>Processa um arquivo CSV e converte múltiplas pastas de imagens em arquivos EPUB separados.</p>
+                    <h3>Mesclar EPUB em Lote</h3>
+                    <p>Processa um arquivo CSV e mescla múltiplas pastas de imagens em um único arquivo EPUB.</p>
                 </div>
             </div>
 
@@ -461,7 +485,10 @@
 
             <!-- Formulário para PDF em Lote -->
             <div id="pdf-batch-form" class="form-section">
-                <h3>📚 Configuração - PDFs em Lote</h3>
+                <h3>📚 Configuração - Mesclar PDF em Lote</h3>
+                <div class="help-text">
+                    <strong>ℹ️ Como funciona:</strong> Esta função lê um arquivo CSV com lista de pastas e mescla todas as imagens em um único arquivo PDF. Cada pasta vira um capítulo/seção no PDF final.
+                </div>
                 <div class="form-group">
                     <label for="pdf-batch-csv">Arquivo CSV:</label>
                     <div class="input-with-button">
@@ -476,7 +503,22 @@
                         <div id="pdf-batch-csv-list"></div>
                     </div>
                 </div>
-                <button class="btn" onclick="executeFunction('pdf-batch')">Gerar PDFs em Lote</button>
+                <div class="form-group">
+                    <label for="pdf-batch-name">Nome do PDF Final:</label>
+                    <input type="text" id="pdf-batch-name" placeholder="Ex: Manga-Completo.pdf" required>
+                    <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">
+                        ⚠️ Este será o nome do arquivo PDF que conterá todas as pastas do CSV mescladas em um único documento.
+                    </small>
+                    <div style="margin-top: 8px;">
+                        <strong style="font-size: 12px; color: #495057;">💡 Exemplos de nomes:</strong>
+                        <div style="margin-top: 4px; font-size: 11px;">
+                            <span class="path-suggestion" onclick="setSuggestedValue('pdf-batch-name', 'Manga-Completo.pdf')" style="margin: 2px 4px 2px 0;">Manga-Completo.pdf</span>
+                            <span class="path-suggestion" onclick="setSuggestedValue('pdf-batch-name', 'Serie-Volumes-1-10.pdf')" style="margin: 2px 4px 2px 0;">Serie-Volumes-1-10.pdf</span>
+                            <span class="path-suggestion" onclick="setSuggestedValue('pdf-batch-name', 'Colecao-2024.pdf')" style="margin: 2px 4px 2px 0;">Colecao-2024.pdf</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn" onclick="executeFunction('pdf-batch')">Gerar PDF Mesclado</button>
             </div>
 
             <!-- Formulário para EPUB Individual -->
@@ -510,7 +552,10 @@
 
             <!-- Formulário para EPUB em Lote -->
             <div id="epub-batch-form" class="form-section">
-                <h3>📚 Configuração - EPUBs em Lote</h3>
+                <h3>📚 Configuração - Mesclar EPUB em Lote</h3>
+                <div class="help-text">
+                    <strong>ℹ️ Como funciona:</strong> Esta função lê um arquivo CSV com lista de pastas e mescla todas as imagens em um único arquivo EPUB. Cada pasta vira um capítulo/seção no EPUB final.
+                </div>
                 <div class="form-group">
                     <label for="epub-batch-csv">Arquivo CSV:</label>
                     <div class="input-with-button">
@@ -525,7 +570,22 @@
                         <div id="epub-batch-csv-list"></div>
                     </div>
                 </div>
-                <button class="btn" onclick="executeFunction('epub-batch')">Gerar EPUBs em Lote</button>
+                <div class="form-group">
+                    <label for="epub-batch-name">Nome do EPUB Final:</label>
+                    <input type="text" id="epub-batch-name" placeholder="Ex: Manga-Completo.epub" required>
+                    <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">
+                        ⚠️ Este será o nome do arquivo EPUB que conterá todas as pastas do CSV mescladas em um único documento.
+                    </small>
+                    <div style="margin-top: 8px;">
+                        <strong style="font-size: 12px; color: #495057;">💡 Exemplos de nomes:</strong>
+                        <div style="margin-top: 4px; font-size: 11px;">
+                            <span class="path-suggestion" onclick="setSuggestedValue('epub-batch-name', 'Manga-Completo.epub')" style="margin: 2px 4px 2px 0;">Manga-Completo.epub</span>
+                            <span class="path-suggestion" onclick="setSuggestedValue('epub-batch-name', 'Serie-Volumes-1-10.epub')" style="margin: 2px 4px 2px 0;">Serie-Volumes-1-10.epub</span>
+                            <span class="path-suggestion" onclick="setSuggestedValue('epub-batch-name', 'Colecao-2024.epub')" style="margin: 2px 4px 2px 0;">Colecao-2024.epub</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn" onclick="executeFunction('epub-batch')">Gerar EPUB Mesclado</button>
             </div>
 
             <!-- Seção de Output -->
@@ -747,6 +807,17 @@
             hidePathHelper(inputId);
         }
 
+        // Função para usar valores sugeridos (nomes de arquivo)
+        function setSuggestedValue(inputId, suggestedValue) {
+            const input = document.getElementById(inputId);
+            input.value = suggestedValue;
+            input.focus();
+            
+            // Trigger change event for validation
+            const event = new Event('input', { bubbles: true });
+            input.dispatchEvent(event);
+        }
+
         // Função para mostrar ajuda de caminho
         function showPathHelper(inputId) {
             const helper = document.getElementById(inputId + '-helper');
@@ -948,8 +1019,12 @@
                         break;
                     case 'pdf-batch':
                         params.csvPath = document.getElementById('pdf-batch-csv').value;
+                        params.outputName = document.getElementById('pdf-batch-name').value;
                         if (!params.csvPath) {
                             throw new Error('Arquivo CSV é obrigatório');
+                        }
+                        if (!params.outputName) {
+                            throw new Error('Nome do PDF final é obrigatório');
                         }
                         break;
                     case 'epub-single':
@@ -961,8 +1036,12 @@
                         break;
                     case 'epub-batch':
                         params.csvPath = document.getElementById('epub-batch-csv').value;
+                        params.outputName = document.getElementById('epub-batch-name').value;
                         if (!params.csvPath) {
                             throw new Error('Arquivo CSV é obrigatório');
+                        }
+                        if (!params.outputName) {
+                            throw new Error('Nome do EPUB final é obrigatório');
                         }
                         break;
                 }

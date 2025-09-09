@@ -106,7 +106,13 @@ app.post('/api/execute', async (req, res) => {
                         error: 'Arquivo CSV é obrigatório'
                     });
                 }
-                result = await executeScript('gen-lote-pdf.js', [params.csvPath]);
+                if (!params.outputName) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Nome do PDF final é obrigatório'
+                    });
+                }
+                result = await executeScript('gen-lote-pdf.js', [params.csvPath, params.outputName]);
                 break;
 
             case 'epub-single':
@@ -130,7 +136,13 @@ app.post('/api/execute', async (req, res) => {
                         error: 'Arquivo CSV é obrigatório'
                     });
                 }
-                result = await executeScript('gen-lote-epub.js', [params.csvPath]);
+                if (!params.outputName) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Nome do EPUB final é obrigatório'
+                    });
+                }
+                result = await executeScript('gen-lote-epub.js', [params.csvPath, params.outputName]);
                 break;
 
             default:
