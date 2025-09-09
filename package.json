@@ -4,7 +4,9 @@
   "description": "Sistema para análise de pastas e conversão de imagens em PDF de forma automatizada",
   "main": "gen-pdf.js",
   "scripts": {
-    "start": "node gen-pdf.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "server": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "analize": "node analizer.js",
     "gen-pdf": "node gen-pdf.js",
@@ -26,6 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "crypto": "^1.0.1",
+    "express": "^4.21.2",
     "pdfkit": "^0.14.0"
   },
   "optionalDependencies": {
@@ -37,5 +40,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/WirisWernek/images-batch-pdf"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

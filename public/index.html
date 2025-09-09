@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Images Batch PDF - Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .functions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .function-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .function-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: #4facfe;
+        }
+
+        .function-card.active {
+            border-color: #4facfe;
+            background: #f0f9ff;
+        }
+
+        .function-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .function-card p {
+            color: #6c757d;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .function-card .icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .input-with-button {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-with-button input {
+            flex: 1;
+        }
+
+        .btn-select-folder {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 140px;
+        }
+
+        .btn-select-folder:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-select-folder:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .path-helper {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #856404;
+            display: none;
+        }
+
+        .path-helper.active {
+            display: block;
+        }
+
+        .path-suggestions {
+            margin-top: 8px;
+        }
+
+        .path-suggestion {
+            display: inline-block;
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin: 2px 4px 2px 0;
+            font-family: monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .path-suggestion:hover {
+            background: #2196f3;
+            color: white;
+        }
+
+        .path-info {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #155724;
+            display: none;
+        }
+
+        .path-info.active {
+            display: block;
+        }
+
+        .path-info .path-text {
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        .csv-selector {
+            background: white;
+            border: 2px solid #4facfe;
+            border-radius: 8px;
+            margin-top: 10px;
+            padding: 15px;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .csv-selector.active {
+            display: block;
+        }
+
+        .csv-selector h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .csv-file-item {
+            padding: 8px 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .csv-file-item:hover {
+            background: #e3f2fd;
+            border-color: #4facfe;
+        }
+
+        .csv-file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .csv-file-name {
+            font-family: monospace;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+
+        .csv-file-date {
+            color: #6c757d;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .output-section.active {
+            display: block;
+        }
+
+        .output-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .output-content {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .file-info {
+            background: #e8f4fd;
+            border-left: 4px solid #4facfe;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Images Batch PDF</h1>
+            <p>Interface para conversão de imagens em PDF e EPUB</p>
+        </div>
+
+        <div class="main-content">
+            <div class="functions-grid">
+                <div class="function-card" onclick="selectFunction('analyze')">
+                    <span class="icon">🔍</span>
+                    <h3>Analisar Pastas</h3>
+                    <p>Examina um diretório e cria um arquivo CSV com a lista de todas as pastas filhas encontradas.</p>
+                </div>
+
+                <div class="function-card" onclick="selectFunction('pdf-single')">
+                    <span class="icon">📄</span>
+                    <h3>Gerar PDF Individual</h3>
+                    <p>Converte todas as imagens de uma pasta específica em um único arquivo PDF.</p>
+                </div>
+
+                <div class="function-card" onclick="selectFunction('pdf-batch')">
+                    <span class="icon">📚</span>
+                    <h3>Gerar PDFs em Lote</h3>
+                    <p>Processa um arquivo CSV e converte múltiplas pastas de imagens em arquivos PDF separados.</p>
+                </div>
+
+                <div class="function-card" onclick="selectFunction('epub-single')">
+                    <span class="icon">📖</span>
+                    <h3>Gerar EPUB Individual</h3>
+                    <p>Converte todas as imagens de uma pasta específica em um único arquivo EPUB.</p>
+                </div>
+
+                <div class="function-card" onclick="selectFunction('epub-batch')">
+                    <span class="icon">📚</span>
+                    <h3>Gerar EPUBs em Lote</h3>
+                    <p>Processa um arquivo CSV e converte múltiplas pastas de imagens em arquivos EPUB separados.</p>
+                </div>
+            </div>
+
+            <!-- Formulário para Analisar Pastas -->
+            <div id="analyze-form" class="form-section">
+                <h3>🔍 Configuração - Analisar Pastas</h3>
+                <div class="form-group">
+                    <label for="analyze-path">Caminho do Diretório:</label>
+                    <div class="input-with-button">
+                        <input type="text" id="analyze-path" placeholder="Ex: /home/usuario/minhas-pastas">
+                        <button class="btn-select-folder" onclick="selectFolder('analyze-path')">📁 Selecionar Pasta</button>
+                        <button class="btn-select-folder" onclick="togglePathHelper('analyze-path')" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); min-width: 50px;">💡</button>
+                    </div>
+                    <div id="analyze-path-info" class="path-info">
+                        <span>📂 Pasta selecionada: </span><span class="path-text" id="analyze-path-text"></span>
+                    </div>
+                    <div id="analyze-path-helper" class="path-helper">
+                        <strong>💡 Dica:</strong> Use o caminho completo da pasta. Exemplos:
+                        <div class="path-suggestions">
+                            <span class="path-suggestion" onclick="setSuggestedPath('analyze-path', '/home/usuario/Downloads')">/home/usuario/Downloads</span>
+                            <span class="path-suggestion" onclick="setSuggestedPath('analyze-path', '/home/usuario/Documentos')">/home/usuario/Documentos</span>
+                            <span class="path-suggestion" onclick="setSuggestedPath('analyze-path', '/home/usuario/manga')">/home/usuario/manga</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn" onclick="executeFunction('analyze')">Analisar Pastas</button>
+            </div>
+
+            <!-- Formulário para PDF Individual -->
+            <div id="pdf-single-form" class="form-section">
+                <h3>📄 Configuração - PDF Individual</h3>
+                <div class="form-group">
+                    <label for="pdf-single-path">Caminho da Pasta com Imagens:</label>
+                    <div class="input-with-button">
+                        <input type="text" id="pdf-single-path" placeholder="Ex: /home/usuario/pasta-imagens">
+                        <button class="btn-select-folder" onclick="selectFolder('pdf-single-path')">📁 Selecionar Pasta</button>
+                        <button class="btn-select-folder" onclick="togglePathHelper('pdf-single-path')" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); min-width: 50px;">💡</button>
+                    </div>
+                    <div id="pdf-single-path-info" class="path-info">
+                        <span>📂 Pasta selecionada: </span><span class="path-text" id="pdf-single-path-text"></span>
+                    </div>
+                    <div id="pdf-single-path-helper" class="path-helper">
+                        <strong>💡 Dica:</strong> Selecione a pasta que contém as imagens numeradas. Exemplos:
+                        <div class="path-suggestions">
+                            <span class="path-suggestion" onclick="setSuggestedPath('pdf-single-path', '/home/usuario/manga/volume-01')">/home/usuario/manga/volume-01</span>
+                            <span class="path-suggestion" onclick="setSuggestedPath('pdf-single-path', '/home/usuario/imagens/capitulo-1')">/home/usuario/imagens/capitulo-1</span>
+                            <span class="path-suggestion" onclick="setSuggestedPath('pdf-single-path', '/home/usuario/Downloads/pasta-imagens')">/home/usuario/Downloads/pasta-imagens</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pdf-single-name">Nome do PDF (opcional):</label>
+                    <input type="text" id="pdf-single-name" placeholder="Se não informado, usará o nome da pasta">
+                </div>
+                <button class="btn" onclick="executeFunction('pdf-single')">Gerar PDF</button>
+            </div>
+
+            <!-- Formulário para PDF em Lote -->
+            <div id="pdf-batch-form" class="form-section">
+                <h3>📚 Configuração - PDFs em Lote</h3>
+                <div class="form-group">
+                    <label for="pdf-batch-csv">Arquivo CSV:</label>
+                    <div class="input-with-button">
+                        <input type="text" id="pdf-batch-csv" placeholder="Ex: /home/usuario/arquivo.csv">
+                        <button class="btn-select-folder" onclick="selectFile('pdf-batch-csv')">📄 Selecionar Arquivo</button>
+                    </div>
+                    <div id="pdf-batch-csv-info" class="path-info">
+                        <span>📄 Arquivo selecionado: </span><span class="path-text" id="pdf-batch-csv-text"></span>
+                    </div>
+                    <div id="pdf-batch-csv-selector" class="csv-selector">
+                        <h4>📂 Arquivos CSV Disponíveis:</h4>
+                        <div id="pdf-batch-csv-list"></div>
+                    </div>
+                </div>
+                <button class="btn" onclick="executeFunction('pdf-batch')">Gerar PDFs em Lote</button>
+            </div>
+
+            <!-- Formulário para EPUB Individual -->
+            <div id="epub-single-form" class="form-section">
+                <h3>📖 Configuração - EPUB Individual</h3>
+                <div class="form-group">
+                    <label for="epub-single-path">Caminho da Pasta com Imagens:</label>
+                    <div class="input-with-button">
+                        <input type="text" id="epub-single-path" placeholder="Ex: /home/usuario/pasta-imagens">
+                        <button class="btn-select-folder" onclick="selectFolder('epub-single-path')">📁 Selecionar Pasta</button>
+                        <button class="btn-select-folder" onclick="togglePathHelper('epub-single-path')" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); min-width: 50px;">💡</button>
+                    </div>
+                    <div id="epub-single-path-info" class="path-info">
+                        <span>📂 Pasta selecionada: </span><span class="path-text" id="epub-single-path-text"></span>
+                    </div>
+                    <div id="epub-single-path-helper" class="path-helper">
+                        <strong>💡 Dica:</strong> Selecione a pasta que contém as imagens para o EPUB. Exemplos:
+                        <div class="path-suggestions">
+                            <span class="path-suggestion" onclick="setSuggestedPath('epub-single-path', '/home/usuario/manga/volume-01')">/home/usuario/manga/volume-01</span>
+                            <span class="path-suggestion" onclick="setSuggestedPath('epub-single-path', '/home/usuario/ebooks/capitulo-1')">/home/usuario/ebooks/capitulo-1</span>
+                            <span class="path-suggestion" onclick="setSuggestedPath('epub-single-path', '/home/usuario/Downloads/pasta-imagens')">/home/usuario/Downloads/pasta-imagens</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="epub-single-name">Nome do EPUB (opcional):</label>
+                    <input type="text" id="epub-single-name" placeholder="Se não informado, usará o nome da pasta">
+                </div>
+                <button class="btn" onclick="executeFunction('epub-single')">Gerar EPUB</button>
+            </div>
+
+            <!-- Formulário para EPUB em Lote -->
+            <div id="epub-batch-form" class="form-section">
+                <h3>📚 Configuração - EPUBs em Lote</h3>
+                <div class="form-group">
+                    <label for="epub-batch-csv">Arquivo CSV:</label>
+                    <div class="input-with-button">
+                        <input type="text" id="epub-batch-csv" placeholder="Ex: /home/usuario/arquivo.csv">
+                        <button class="btn-select-folder" onclick="selectFile('epub-batch-csv')">📄 Selecionar Arquivo</button>
+                    </div>
+                    <div id="epub-batch-csv-info" class="path-info">
+                        <span>📄 Arquivo selecionado: </span><span class="path-text" id="epub-batch-csv-text"></span>
+                    </div>
+                    <div id="epub-batch-csv-selector" class="csv-selector">
+                        <h4>📂 Arquivos CSV Disponíveis:</h4>
+                        <div id="epub-batch-csv-list"></div>
+                    </div>
+                </div>
+                <button class="btn" onclick="executeFunction('epub-batch')">Gerar EPUBs em Lote</button>
+            </div>
+
+            <!-- Seção de Output -->
+            <div id="output-section" class="output-section">
+                <h3>📋 Output do Processo</h3>
+                <div id="output-content" class="output-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFunction = null;
+
+        // Função para selecionar pastas
+        async function selectFolder(inputId) {
+            try {
+                // Primeiro, tenta obter caminhos comuns do sistema
+                let commonPaths = [];
+                try {
+                    const response = await fetch('/api/common-paths');
+                    const data = await response.json();
+                    if (data.success) {
+                        commonPaths = data.paths;
+                    }
+                } catch (e) {
+                    console.log('Não foi possível obter caminhos comuns');
+                }
+                
+                // Verifica se o navegador suporta a API File System Access
+                if ('showDirectoryPicker' in window) {
+                    const directoryHandle = await window.showDirectoryPicker();
+                    const folderName = directoryHandle.name;
+                    
+                    // Tenta fazer uma sugestão inteligente baseada nos caminhos comuns
+                    let suggestedPath = '';
+                    const currentValue = document.getElementById(inputId).value;
+                    
+                    if (currentValue) {
+                        suggestedPath = currentValue;
+                    } else if (commonPaths.length > 0) {
+                        // Prioriza Downloads se existir, senão pega o primeiro
+                        suggestedPath = commonPaths.find(p => p.includes('Downloads')) || 
+                                       commonPaths.find(p => p.includes('Documents') || p.includes('Documentos')) ||
+                                       commonPaths[0];
+                        suggestedPath = `${suggestedPath}/${folderName}`;
+                    } else {
+                        suggestedPath = `/home/usuario/${folderName}`;
+                    }
+                    
+                    const fullPath = prompt(
+                        `📁 Pasta selecionada: "${folderName}"\n\n` +
+                        `Por questões de segurança, os navegadores não fornecem o caminho completo.\n` +
+                        `Por favor, confirme ou edite o caminho completo da pasta:`,
+                        suggestedPath
+                    );
+                    
+                    if (fullPath && fullPath.trim()) {
+                        // Atualiza o campo de input
+                        const input = document.getElementById(inputId);
+                        input.value = fullPath.trim();
+                        
+                        // Mostra informação da pasta selecionada
+                        showPathInfo(inputId, fullPath.trim());
+                        hidePathHelper(inputId);
+                    }
+                    
+                } else {
+                    // Fallback para navegadores que não suportam a API
+                    let suggestedPath = '/home/usuario/pasta-exemplo';
+                    if (commonPaths.length > 0) {
+                        suggestedPath = commonPaths[0];
+                    }
+                    
+                    const path = prompt(
+                        '📁 Seleção de Pasta\n\n' +
+                        'Seu navegador não suporta seleção visual de pastas.\n' +
+                        'Digite o caminho completo da pasta:',
+                        suggestedPath
+                    );
+                    
+                    if (path && path.trim()) {
+                        const input = document.getElementById(inputId);
+                        input.value = path.trim();
+                        showPathInfo(inputId, path.trim());
+                        hidePathHelper(inputId);
+                    }
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Erro ao selecionar pasta:', error);
+                    alert('❌ Erro ao selecionar pasta. Tente digitar o caminho manualmente.');
+                }
+            }
+        }
+
+        // Função para selecionar arquivos
+        async function selectFile(inputId) {
+            // Primeiro, tenta mostrar arquivos CSV existentes
+            const selectorId = inputId + '-selector';
+            const selector = document.getElementById(selectorId);
+            
+            if (selector) {
+                // Toggle do seletor de CSV
+                if (selector.classList.contains('active')) {
+                    selector.classList.remove('active');
+                    return;
+                }
+                
+                // Carrega e mostra arquivos CSV disponíveis
+                await loadAvailableCSVs(inputId);
+                selector.classList.add('active');
+                return;
+            }
+            
+            // Fallback para seleção manual se não houver seletor
+            try {
+                if ('showOpenFilePicker' in window) {
+                    const [fileHandle] = await window.showOpenFilePicker({
+                        types: [{
+                            description: 'Arquivos CSV',
+                            accept: {
+                                'text/csv': ['.csv']
+                            }
+                        }],
+                        multiple: false
+                    });
+                    
+                    const file = await fileHandle.getFile();
+                    const filePath = file.name;
+                    
+                    const input = document.getElementById(inputId);
+                    input.value = filePath;
+                    showPathInfo(inputId, filePath);
+                    
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.csv';
+                    input.onchange = function(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            const targetInput = document.getElementById(inputId);
+                            targetInput.value = file.name;
+                            showPathInfo(inputId, file.name);
+                        }
+                    };
+                    input.click();
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Erro ao selecionar arquivo:', error);
+                    alert('❌ Erro ao selecionar arquivo. Tente digitar o caminho manualmente.');
+                }
+            }
+        }
+
+        // Função para carregar CSVs disponíveis
+        async function loadAvailableCSVs(inputId) {
+            try {
+                const response = await fetch('/api/csv-files');
+                const data = await response.json();
+                
+                const listId = inputId + '-list';
+                const listElement = document.getElementById(listId);
+                
+                if (!listElement) return;
+                
+                if (data.files && data.files.length > 0) {
+                    listElement.innerHTML = data.files.map(file => {
+                        const date = new Date(file.modified).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        return `
+                            <div class="csv-file-item" onclick="selectCSVFile('${inputId}', '${file.relativePath}', '${file.name}')">
+                                <div class="csv-file-name">${file.name}</div>
+                                <div class="csv-file-date">Modificado em: ${date}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    listElement.innerHTML = '<div style="color: #6c757d; font-style: italic; text-align: center; padding: 10px;">Nenhum arquivo CSV encontrado</div>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar arquivos CSV:', error);
+                const listId = inputId + '-list';
+                const listElement = document.getElementById(listId);
+                if (listElement) {
+                    listElement.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 10px;">❌ Erro ao carregar arquivos</div>';
+                }
+            }
+        }
+
+        // Função para selecionar um arquivo CSV específico
+        function selectCSVFile(inputId, filePath, fileName) {
+            const input = document.getElementById(inputId);
+            input.value = filePath;
+            
+            showPathInfo(inputId, filePath);
+            
+            // Esconde o seletor
+            const selector = document.getElementById(inputId + '-selector');
+            if (selector) {
+                selector.classList.remove('active');
+            }
+        }
+
+        // Função para usar caminhos sugeridos
+        function setSuggestedPath(inputId, suggestedPath) {
+            const input = document.getElementById(inputId);
+            input.value = suggestedPath;
+            input.focus();
+            
+            showPathInfo(inputId, suggestedPath);
+            hidePathHelper(inputId);
+        }
+
+        // Função para mostrar ajuda de caminho
+        function showPathHelper(inputId) {
+            const helper = document.getElementById(inputId + '-helper');
+            if (helper) {
+                helper.classList.add('active');
+            }
+        }
+
+        // Função para esconder ajuda de caminho
+        function hidePathHelper(inputId) {
+            const helper = document.getElementById(inputId + '-helper');
+            if (helper) {
+                helper.classList.remove('active');
+            }
+        }
+
+        // Função para alternar ajuda de caminho
+        function togglePathHelper(inputId) {
+            const helper = document.getElementById(inputId + '-helper');
+            if (helper) {
+                helper.classList.toggle('active');
+            }
+        }
+
+        // Função para mostrar informações do caminho selecionado
+        function showPathInfo(inputId, path) {
+            const infoElement = document.getElementById(inputId + '-info');
+            const textElement = document.getElementById(inputId + '-text');
+            
+            if (infoElement && textElement) {
+                textElement.textContent = path;
+                infoElement.classList.add('active');
+            }
+        }
+
+        // Função para esconder informações do caminho
+        function hidePathInfo(inputId) {
+            const infoElement = document.getElementById(inputId + '-info');
+            if (infoElement) {
+                infoElement.classList.remove('active');
+            }
+        }
+
+        // Função para carregar sugestões de caminhos reais
+        async function loadRealPathSuggestions() {
+            try {
+                const response = await fetch('/api/common-paths');
+                const data = await response.json();
+                
+                if (data.success && data.paths.length > 0) {
+                    // Atualiza as sugestões com caminhos reais
+                    updatePathSuggestions('analyze-path', data.paths, ['', '/manga', '/volumes']);
+                    updatePathSuggestions('pdf-single-path', data.paths, ['/manga/volume-01', '/imagens/capitulo-1', '/pasta-imagens']);
+                    updatePathSuggestions('epub-single-path', data.paths, ['/manga/volume-01', '/ebooks/capitulo-1', '/pasta-imagens']);
+                }
+            } catch (error) {
+                console.log('Usando sugestões padrão');
+            }
+        }
+
+        // Função para atualizar sugestões de caminho
+        function updatePathSuggestions(inputId, basePaths, suffixes) {
+            const suggestionsContainer = document.querySelector(`#${inputId}-helper .path-suggestions`);
+            if (!suggestionsContainer) return;
+            
+            let suggestions = [];
+            
+            // Combina caminhos base com sufixos
+            basePaths.slice(0, 3).forEach(basePath => {
+                suffixes.forEach(suffix => {
+                    suggestions.push(basePath + suffix);
+                });
+            });
+            
+            // Remove duplicatas e limita a 6 sugestões
+            suggestions = [...new Set(suggestions)].slice(0, 6);
+            
+            // Atualiza o HTML
+            suggestionsContainer.innerHTML = suggestions.map(path => 
+                `<span class="path-suggestion" onclick="setSuggestedPath('${inputId}', '${path}')">${path}</span>`
+            ).join('');
+        }
+
+        // Adicionar listeners para campos de input
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carrega sugestões de caminhos reais
+            loadRealPathSuggestions();
+            // Lista de inputs que têm seleção de pasta/arquivo
+            const inputsWithSelection = [
+                'analyze-path',
+                'pdf-single-path', 
+                'pdf-batch-csv',
+                'epub-single-path',
+                'epub-batch-csv'
+            ];
+            
+            inputsWithSelection.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    // Listener para quando o usuário digita manualmente
+                    input.addEventListener('input', function() {
+                        if (this.value.trim()) {
+                            showPathInfo(inputId, this.value.trim());
+                            hidePathHelper(inputId);
+                        } else {
+                            hidePathInfo(inputId);
+                        }
+                    });
+                    
+                    // Listener para quando o campo ganha foco
+                    input.addEventListener('focus', function() {
+                        if (!this.value.trim()) {
+                            // Mostra ajuda apenas se o campo estiver vazio
+                            setTimeout(() => showPathHelper(inputId), 500);
+                        }
+                    });
+                    
+                    // Listener para quando o campo perde foco
+                    input.addEventListener('blur', function() {
+                        if (!this.value.trim()) {
+                            hidePathInfo(inputId);
+                        }
+                        // Esconde ajuda após um tempo
+                        setTimeout(() => hidePathHelper(inputId), 3000);
+                    });
+                }
+            });
+            
+            // Listener para esconder seletores CSV quando clicar fora
+            document.addEventListener('click', function(event) {
+                const csvSelectors = document.querySelectorAll('.csv-selector');
+                csvSelectors.forEach(selector => {
+                    if (selector.classList.contains('active')) {
+                        // Verifica se o clique não foi dentro do seletor ou no botão relacionado
+                        const rect = selector.getBoundingClientRect();
+                        const clickX = event.clientX;
+                        const clickY = event.clientY;
+                        
+                        const isInsideSelector = clickX >= rect.left && clickX <= rect.right && 
+                                               clickY >= rect.top && clickY <= rect.bottom;
+                        
+                        const isSelectButton = event.target.classList.contains('btn-select-folder') ||
+                                             event.target.closest('.btn-select-folder');
+                        
+                        if (!isInsideSelector && !isSelectButton) {
+                            selector.classList.remove('active');
+                        }
+                    }
+                });
+            });
+        });
+
+        function selectFunction(functionName) {
+            // Remove active class from all cards and forms
+            document.querySelectorAll('.function-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelectorAll('.form-section').forEach(form => {
+                form.classList.remove('active');
+            });
+
+            // Add active class to selected card
+            event.currentTarget.classList.add('active');
+            
+            // Show corresponding form
+            const form = document.getElementById(`${functionName}-form`);
+            if (form) {
+                form.classList.add('active');
+            }
+
+            currentFunction = functionName;
+        }
+
+        async function executeFunction(functionName) {
+            if (!currentFunction) return;
+
+            const outputSection = document.getElementById('output-section');
+            const outputContent = document.getElementById('output-content');
+            
+            outputSection.classList.add('active');
+            outputContent.innerHTML = '<span class="loading"></span>Processando...';
+
+            let params = {};
+            
+            try {
+                switch(functionName) {
+                    case 'analyze':
+                        params.path = document.getElementById('analyze-path').value;
+                        if (!params.path) {
+                            throw new Error('Caminho do diretório é obrigatório');
+                        }
+                        break;
+                    case 'pdf-single':
+                        params.path = document.getElementById('pdf-single-path').value;
+                        params.name = document.getElementById('pdf-single-name').value;
+                        if (!params.path) {
+                            throw new Error('Caminho da pasta é obrigatório');
+                        }
+                        break;
+                    case 'pdf-batch':
+                        params.csvPath = document.getElementById('pdf-batch-csv').value;
+                        if (!params.csvPath) {
+                            throw new Error('Arquivo CSV é obrigatório');
+                        }
+                        break;
+                    case 'epub-single':
+                        params.path = document.getElementById('epub-single-path').value;
+                        params.name = document.getElementById('epub-single-name').value;
+                        if (!params.path) {
+                            throw new Error('Caminho da pasta é obrigatório');
+                        }
+                        break;
+                    case 'epub-batch':
+                        params.csvPath = document.getElementById('epub-batch-csv').value;
+                        if (!params.csvPath) {
+                            throw new Error('Arquivo CSV é obrigatório');
+                        }
+                        break;
+                }
+
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        function: functionName,
+                        params: params
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    outputContent.innerHTML = `<span class="success">✅ Processo concluído com sucesso!</span>\n\n${result.output}`;
+                } else {
+                    outputContent.innerHTML = `<span class="error">❌ Erro durante o processamento:</span>\n\n${result.error}`;
+                }
+            } catch (error) {
+                outputContent.innerHTML = `<span class="error">❌ Erro:</span>\n\n${error.message}`;
+            }
+        }
+
+        // Auto-select first function on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstCard = document.querySelector('.function-card');
+            if (firstCard) {
+                firstCard.click();
+            }
+        });
+    </script>
+</body>
+</html>
