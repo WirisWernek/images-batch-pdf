@@ -432,6 +432,9 @@
             <!-- Formulário para Analisar Pastas -->
             <div id="analyze-form" class="form-section">
                 <h3>🔍 Configuração - Analisar Pastas</h3>
+                <div class="help-text">
+                    <strong>ℹ️ Como funciona:</strong> Esta função examina um diretório e cria um arquivo CSV com a lista de todas as pastas filhas encontradas. Use este CSV nas funções de lote.
+                </div>
                 <div class="form-group">
                     <label for="analyze-path">Caminho do Diretório:</label>
                     <div class="input-with-button">
@@ -448,6 +451,21 @@
                             <span class="path-suggestion" onclick="setSuggestedPath('analyze-path', '/home/usuario/Downloads')">/home/usuario/Downloads</span>
                             <span class="path-suggestion" onclick="setSuggestedPath('analyze-path', '/home/usuario/Documentos')">/home/usuario/Documentos</span>
                             <span class="path-suggestion" onclick="setSuggestedPath('analyze-path', '/home/usuario/manga')">/home/usuario/manga</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="analyze-csv-name">Nome do Arquivo CSV (opcional):</label>
+                    <input type="text" id="analyze-csv-name" placeholder="Ex: manga-volumes.csv">
+                    <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">
+                        📝 Se não informado, será gerado um nome único automaticamente (UUID). Pode incluir ou omitir a extensão .csv
+                    </small>
+                    <div style="margin-top: 8px;">
+                        <strong style="font-size: 12px; color: #495057;">💡 Exemplos de nomes:</strong>
+                        <div style="margin-top: 4px; font-size: 11px;">
+                            <span class="path-suggestion" onclick="setSuggestedValue('analyze-csv-name', 'manga-volumes.csv')" style="margin: 2px 4px 2px 0;">manga-volumes.csv</span>
+                            <span class="path-suggestion" onclick="setSuggestedValue('analyze-csv-name', 'serie-completa')" style="margin: 2px 4px 2px 0;">serie-completa</span>
+                            <span class="path-suggestion" onclick="setSuggestedValue('analyze-csv-name', 'analise-2024.csv')" style="margin: 2px 4px 2px 0;">analise-2024.csv</span>
                         </div>
                     </div>
                 </div>
@@ -908,10 +926,13 @@
             // Lista de inputs que têm seleção de pasta/arquivo
             const inputsWithSelection = [
                 'analyze-path',
+                'analyze-csv-name',
                 'pdf-single-path', 
                 'pdf-batch-csv',
+                'pdf-batch-name',
                 'epub-single-path',
-                'epub-batch-csv'
+                'epub-batch-csv',
+                'epub-batch-name'
             ];
             
             inputsWithSelection.forEach(inputId => {
@@ -1006,6 +1027,7 @@
                 switch(functionName) {
                     case 'analyze':
                         params.path = document.getElementById('analyze-path').value;
+                        params.csvName = document.getElementById('analyze-csv-name').value;
                         if (!params.path) {
                             throw new Error('Caminho do diretório é obrigatório');
                         }

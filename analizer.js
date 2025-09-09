@@ -90,9 +90,10 @@ function generateCSV(folders, outputPath) {
 /**
  * Função principal que executa todo o processo
  * @param {string} folderPath - Caminho da pasta a ser analisada
+ * @param {string} [customName] - Nome personalizado para o arquivo CSV (opcional)
  * @returns {string} Caminho completo do arquivo CSV gerado
  */
-function main(folderPath) {
+function main(folderPath, customName = null) {
     try {
         console.log(`Analisando pasta: ${folderPath}`);
         
@@ -100,9 +101,19 @@ function main(folderPath) {
         const folders = listImmediateFolders(folderPath);
         console.log(`Encontradas ${folders.length} pasta(s)`);
 
-        // Gera nome do arquivo CSV com UUID
-        const uuid = generateUUID(folderPath);
-        const csvFileName = `${uuid}.csv`;
+        // Determina o nome do arquivo CSV
+        let csvFileName;
+        if (customName) {
+            // Se um nome foi fornecido, usa ele (adiciona .csv se necessário)
+            csvFileName = customName.endsWith('.csv') ? customName : `${customName}.csv`;
+            console.log(`Usando nome personalizado: ${csvFileName}`);
+        } else {
+            // Caso contrário, gera UUID
+            const uuid = generateUUID(folderPath);
+            csvFileName = `${uuid}.csv`;
+            console.log(`Usando nome com UUID: ${csvFileName}`);
+        }
+        
         const csvPath = path.join(process.cwd(),'csv', csvFileName);
 
         // Gera o arquivo CSV
@@ -112,8 +123,9 @@ function main(folderPath) {
         console.log(`Caminho completo: ${fullCsvPath}`);
 
         console.log('\n📌 Próximo passo:');
-        console.log(`npm run proccess ${fullCsvPath} ${uuid}`);
-        console.log(`npm run merge ${fullCsvPath} ${uuid}`);
+        const baseName = path.basename(csvFileName, '.csv');
+        console.log(`npm run proccess ${fullCsvPath} ${baseName}`);
+        console.log(`npm run merge ${fullCsvPath} ${baseName}`);
 
         return fullCsvPath;
     } catch (error) {
@@ -122,19 +134,69 @@ function main(folderPath) {
     }
 }
 
+/**
+ * Função de ajuda
+ */
+function showHelp() {
+    console.log(`
+🔍 Analisador de Pastas - Gerador de CSV
+
+Uso:
+  node analizer.js <caminho_da_pasta> [nome_do_csv]
+
+Argumentos:
+  caminho_da_pasta    Caminho completo da pasta a ser analisada
+  nome_do_csv         Nome personalizado para o arquivo CSV (opcional)
+
+Exemplos:
+  # Gera CSV com UUID automático
+  node analizer.js /home/usuario/manga
+
+  # Gera CSV com nome personalizado
+  node analizer.js /home/usuario/manga manga-volumes
+  node analizer.js /home/usuario/manga manga-volumes.csv
+  node analizer.js "/pasta/com espaços" "Serie Completa"
+
+Funcionalidade:
+  - Examina a pasta especificada
+  - Lista todas as pastas filhas imediatas (não recursivo)
+  - Gera arquivo CSV com formato: nome;caminho
+  - Salva na pasta 'csv/' do projeto
+
+Observações:
+  - Se nome_do_csv não for informado, gera UUID único
+  - A extensão .csv é adicionada automaticamente se omitida
+  - Cria a pasta 'csv/' se não existir
+  - Ignora arquivos, considera apenas pastas
+    `);
+}
+
 // Execução do script
 if (require.main === module) {
+    const args = process.argv;
+    
+    // Verifica se é pedido de ajuda
+    if (args.includes('--help') || args.includes('-h')) {
+        showHelp();
+        process.exit(0);
+    }
+    
     // Verifica se o caminho foi fornecido como argumento
     const targetPath = process.argv[2];
+    const customName = process.argv[3]; // Nome personalizado opcional
     
     if (!targetPath) {
-        console.error('Uso: node script.js <caminho_da_pasta>');
-        console.error('Exemplo: node script.js /home/usuario/documentos');
+        console.error('❌ Erro: Caminho da pasta é obrigatório\n');
+        console.error('Uso: node analizer.js <caminho_da_pasta> [nome_do_csv]');
+        console.error('Exemplo: node analizer.js /home/usuario/documentos');
+        console.error('Exemplo: node analizer.js /home/usuario/documentos manga-volumes');
+        console.error('Exemplo: node analizer.js /home/usuario/documentos "Serie Completa.csv"');
+        console.error('\nPara mais informações: node analizer.js --help');
         process.exit(1);
     }
 
     // Executa a função principal
-    main(targetPath);
+    main(targetPath, customName);
 }
 
 module.exports = {

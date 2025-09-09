@@ -82,7 +82,11 @@ app.post('/api/execute', async (req, res) => {
                         error: 'Caminho do diretório é obrigatório'
                     });
                 }
-                result = await executeScript('analizer.js', [params.path]);
+                const analyzeArgs = [params.path];
+                if (params.csvName && params.csvName.trim()) {
+                    analyzeArgs.push(params.csvName.trim());
+                }
+                result = await executeScript('analizer.js', analyzeArgs);
                 break;
 
             case 'pdf-single':
