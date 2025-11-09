@@ -55,6 +55,12 @@ function listImmediateFolders(targetPath) {
             }
         }
 
+        // Ordena as pastas alfabeticamente pelo nome
+        folders.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { 
+            numeric: true, 
+            sensitivity: 'base' 
+        }));
+
         return folders;
     } catch (error) {
         throw new Error(`Erro ao listar pastas: ${error.message}`);
