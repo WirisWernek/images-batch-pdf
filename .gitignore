@@ -153,3 +153,4 @@ epub/*
 *.tgz
 *.rar
 *.7z
+./scripts/*
