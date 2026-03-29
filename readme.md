@@ -1,546 +1,172 @@
-# 📄 Images Batch PDF
+# Images Batch PDF
 
-Um conjunto de ferramentas em Node.js que permite analisar pastas de um diretório e converter suas imagens em arquivos PDF de forma automatizada. O sistema funciona em duas etapas: primeiro analisa e cataloga as pastas, depois converte as imagens de cada pasta em PDFs individuais.
+Ferramenta em Node.js para processar pastas com imagens e gerar arquivos PDF ou EPUB em modo individual, em lote (via CSV) ou consolidado (arquivo unico).
 
-## 🎯 O que o projeto faz?
+Este README cobre o uso via CLI.
 
-Este projeto oferece uma solução completa para converter múltiplas pastas contendo imagens em arquivos PDF separados. É especialmente útil quando você tem uma estrutura de pastas onde cada pasta representa um documento ou conjunto de imagens que devem ser convertidos em PDFs individuais.
+## O que o projeto faz hoje
 
-### Fluxo de trabalho:
-1. **Análise**: O script `analizer.js` examina um diretório e lista todas as pastas filhas
-2. **Catalogação**: Cria um arquivo CSV com a lista de pastas encontradas
-3. **Conversão**: O script `gen-pdf.js` lê o CSV e converte as imagens de cada pasta em PDFs
+1. Analisa um diretorio e gera um CSV com as subpastas imediatas.
+2. Converte imagens de uma pasta para um PDF.
+3. Converte varias pastas (via CSV) para varios PDFs.
+4. Consolida varias pastas (via CSV) em um unico PDF.
+5. Converte imagens de uma pasta para um EPUB.
+6. Converte varias pastas (via CSV) para varios EPUBs.
+7. Consolida varias pastas (via CSV) em um unico EPUB.
 
-## 🚀 Características
+## Pre-requisitos
 
-- � **Análise automática de pastas**: Examina diretórios e cataloga pastas filhas
-- 📊 **Geração de CSV**: Cria arquivos de controle para processamento em lote
-- �️ **Conversão de imagens**: Transforma imagens numeradas em PDFs
-- 📋 **Processamento em lote**: Converte múltiplas pastas de uma só vez
-- 🔄 **Seis modos de operação**: Análise, conversão individual, conversão em lote, fusão em PDF único, conversão para EPUB e fusão em EPUB único
-- ✅ **Ordenação inteligente**: Organiza imagens numericamente (1, 2, 3, ..., 10, 11)
-- 🎯 **Preservação de qualidade**: Mantém a qualidade original das imagens
+- Node.js >= 14
+- npm
+- Comando `zip` disponivel no sistema (necessario para gerar EPUB)
+- Permissao de leitura nas pastas de origem e escrita no projeto
 
-## 📦 Como instalar e começar
-
-### 1. Clonar o projeto
+## Instalacao
 
 ```bash
-# Clona o repositório
-git clone https://github.com/WirisWernek/images-batch-pdf.git
-cd images-batch-pdf
-
-# Ou baixe e extraia o arquivo ZIP do GitHub
-```
-
-### 2. Instalar dependências
-
-```bash
-# Instala as bibliotecas necessárias
 npm install
+mkdir -p csv pdf epub
 ```
 
-### 3. Criar pastas necessárias
+## Comandos disponiveis
 
 ```bash
-# Cria as pastas onde os arquivos serão salvos
-mkdir -p csv pdf
+npm run analize
+npm run gen-pdf
+npm run gen-lote-pdf
+npm run gen-epub
+npm run gen-lote-epub
 ```
 
-## 🛠️ Como usar - Seis modos de operação
+## Modos de uso (CLI)
 
-### Modo 1: 📊 Análise de Pastas (`analizer.js`)
+### 1) Analise de pastas
 
-**O que faz**: Examina um diretório e cria um arquivo CSV listando todas as pastas filhas encontradas.
-
-**Quando usar**: Quando você tem um diretório com várias pastas e quer preparar uma lista para conversão em lote.
+Gera um CSV no formato `nome;caminho` com as subpastas imediatas do diretorio informado.
 
 ```bash
-# Comando básico
+# nome automatico
 npm run analize /caminho/para/diretorio
 
-# Exemplo prático
-npm run analize /home/usuario/documentos/escaneados
+# nome customizado
+npm run analize /caminho/para/diretorio meu-lote
 ```
 
-**O que acontece**:
-1. O script examina o diretório informado
-2. Lista todas as pastas filhas (ignora arquivos)
-3. Gera um arquivo CSV na pasta `csv/` com nome único (UUID)
-4. O CSV contém: nome da pasta e caminho completo
+Saida: `csv/<nome>.csv`.
 
-**Exemplo de saída no terminal**:
-```
-Analisando pasta: /home/usuario/documentos/escaneados
-Encontradas 3 pasta(s)
-Arquivo CSV gerado com sucesso!
-Caminho completo: /home/usuario/projeto/csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
-```
-
-### Modo 2: 📄 Conversão Individual de PDF (`gen-pdf.js`)
-
-**O que faz**: Converte as imagens de uma pasta específica em um arquivo PDF.
-
-**Quando usar**: Quando você quer converter apenas uma pasta de imagens em PDF.
+### 2) PDF individual (uma pasta)
 
 ```bash
-# Comando básico
 npm run gen-pdf /caminho/da/pasta nome-do-arquivo
-
-# Exemplo prático
-npm run gen-pdf /home/usuario/documentos/pasta1 documento1
 ```
 
-**Exemplo de saída no terminal**:
-```
-🚀 Iniciando conversão de imagens para PDF...
+Saida: `<nome-do-arquivo>.pdf` no diretorio atual do projeto.
 
-📁 Pasta: /home/usuario/documentos/pasta1
-📄 Arquivo de saída: documento1
-
-📖 Lendo arquivos da pasta...
-Encontrados 5 arquivo(s) de imagem
-
-🔍 Validando arquivos...
-
-📝 Criando PDF...
-
-✅ Conversão concluída com sucesso!
-📄 Arquivo salvo em: /home/user/images-batch-pdf/pdf/documento1.pdf
-```
-
-### Modo 3: 📋 Conversão em Lote de PDF (`gen-pdf.js` + CSV)
-
-**O que faz**: Lê um arquivo CSV (gerado pelo `analizer.js`) e converte todas as pastas listadas em PDFs separados.
-
-**Quando usar**: Quando você quer converter múltiplas pastas de uma só vez, usando o CSV gerado na etapa de análise.
+### 3) PDF em lote por CSV
 
 ```bash
-# Usando o CSV gerado pelo analizer
-npm run gen-pdf csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
+npm run gen-pdf csv/arquivo.csv
 ```
 
-**Exemplo de saída no terminal**:
-```
-🚀 Iniciando conversão de imagens para PDF...
+Saida: um PDF por linha valida do CSV, em `pdf/`.
 
-📄 Arquivo CSV: csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
-
-📋 Processando 3 entrada(s) do CSV...
-
-📁 Processando 1/3
-   🖼️ Encontradas 8 imagem(ns)
-   📝 Criando PDF: pdf/Pasta1.pdf
-   ✅ PDF criado: /home/user/images-batch-pdf/pdf/Pasta1.pdf
-
-📁 Processando 2/3
-   🖼️ Encontradas 12 imagem(ns)
-   📝 Criando PDF: pdf/Pasta2.pdf
-   ✅ PDF criado: /home/user/images-batch-pdf/pdf/Pasta2.pdf
-
-📁 Processando 3/3
-   🖼️ Encontradas 6 imagem(ns)
-   📝 Criando PDF: pdf/Pasta3.pdf
-   ✅ PDF criado: /home/usuario/projeto/pdf/Pasta3.pdf
-
-🎉 Processamento do CSV concluído!
-```
-
-### Modo 4: 🔗 Fusão em PDF Único (`gen-lote-pdf.js`)
-
-**O que faz**: Lê um arquivo CSV (gerado pelo `analizer.js`) e combina todas as imagens de todas as pastas em um único arquivo PDF.
-
-**Quando usar**: Quando você quer criar um único documento PDF contendo todas as imagens de múltiplas pastas em sequência.
+### 4) PDF consolidado unico por CSV
 
 ```bash
-# Usando o CSV gerado pelo analizer
-npm run gen-lote-pdf csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv documento-completo
-
-# Especificando nome com extensão
-npm run gen-lote-pdf meu-arquivo.csv relatorio-unificado.pdf
+npm run gen-lote-pdf csv/arquivo.csv documento-unificado
 ```
 
-**Exemplo de saída no terminal**:
-```
-🔗 Iniciando fusão de imagens de múltiplas pastas em PDF único...
+Saida: `pdf/documento-unificado.pdf`.
 
-📄 Arquivo CSV: csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
-📄 Arquivo de saída: documento-completo
-
-📋 Coletando imagens de 3 pasta(s)...
-
-📁 Processando pasta 1/3: Pasta1
-   🖼️ Encontradas 8 imagem(ns)
-   ✅ 8 imagem(ns) adicionadas
-
-📁 Processando pasta 2/3: Pasta2
-   🖼️ Encontradas 12 imagem(ns)
-   ✅ 12 imagem(ns) adicionadas
-
-📁 Processando pasta 3/3: Pasta3
-   🖼️ Encontradas 6 imagem(ns)
-   ✅ 6 imagem(ns) adicionadas
-
-🎯 Total de imagens coletadas: 26
-
-📝 Criando PDF unificado...
-   📄 Processadas 10/26 imagens
-   📄 Processadas 20/26 imagens
-   📄 Processadas 26/26 imagens
-
-📊 Estatísticas do processamento:
-   📂 Pastas processadas: 3
-   🖼️ Total de imagens: 26
-
-   📈 Imagens por pasta:
-     • Pasta1: 8 imagem(ns)
-     • Pasta2: 12 imagem(ns)
-     • Pasta3: 6 imagem(ns)
-
-   📄 Arquivo de saída: /home/user/projeto/pdf/documento-completo.pdf
-
-✅ Fusão de PDFs concluída com sucesso!
-🎉 Arquivo unificado salvo em: /home/user/projeto/pdf/documento-completo.pdf
-```
-
-### Modo 5: 📚 Conversão Individual de EPUB (`gen-epub.js`)
-
-**O que faz**: Converte imagens de pastas em livros eletrônicos no formato EPUB, compatível com leitores de e-book.
-
-**Quando usar**: Quando você quer criar livros eletrônicos para ler em dispositivos como Kindle, tablets ou aplicativos de leitura.
+### 5) EPUB (individual e lote)
 
 ```bash
-# Modo individual - uma pasta para um EPUB
+# individual
 npm run gen-epub /caminho/da/pasta nome-do-livro
 
-# Modo lote - usando CSV do analizer
+# lote por CSV
 npm run gen-epub csv/arquivo.csv
-
-# Exemplo prático
-npm run gen-epub /home/usuario/manga/volume1 manga-vol1.epub
 ```
 
-**Exemplo de saída no terminal**:
-```
-📚 Iniciando conversão de imagens para EPUB...
+Saida:
+- Individual: `epub/<nome-do-livro>.epub`
+- Lote: um EPUB por linha valida do CSV, em `epub/`
 
-📁 Pasta: /home/usuario/manga/volume1
-📚 Arquivo de saída: manga-vol1
-
-📖 Lendo arquivos da pasta...
-Encontrados 20 arquivo(s) de imagem
-
-🔍 Validando arquivos...
-
-📚 Criando EPUB...
-   📁 Criando estrutura EPUB...
-   🖼️ Copiando imagens...
-   📄 Criando páginas HTML...
-   📋 Criando manifest...
-   🗂️ Criando índice...
-   📦 Compactando EPUB...
-
-✅ Conversão concluída com sucesso!
-📚 Arquivo salvo em: /home/user/projeto/epub/manga-vol1.epub
-```
-
-**Características do EPUB**:
-- ✅ **Padrão aberto** - Compatível com a maioria dos leitores
-- ✅ **Navegação** - Índice automático para pular entre páginas
-- ✅ **Metadados** - Título, autor, data de criação incluídos
-- ✅ **Responsivo** - Adapta-se ao tamanho da tela do dispositivo
-- ✅ **Leve** - Compactação eficiente das imagens
-
-### Modo 6: 📚 Fusão em EPUB Único (`gen-lote-epub.js`)
-
-**O que faz**: Lê um arquivo CSV (gerado pelo `analizer.js`) e combina todas as imagens de todas as pastas em um único arquivo EPUB.
-
-**Quando usar**: Quando você quer criar um único livro eletrônico contendo todas as imagens de múltiplas pastas organizadas por capítulos.
+### 6) EPUB consolidado unico por CSV
 
 ```bash
-# Usando o CSV gerado pelo analizer
-npm run gen-lote-epub csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv manga-completo
-
-# Especificando nome com extensão
-npm run gen-lote-epub meu-arquivo.csv historia-completa.epub
+npm run gen-lote-epub csv/arquivo.csv livro-unificado
 ```
 
-**Exemplo de saída no terminal**:
-```
-📚 Iniciando fusão de imagens de múltiplas pastas em EPUB único...
+Saida: `epub/livro-unificado.epub`.
 
-📄 Arquivo CSV: csv/aa96cdc2-f222-4b49-9b68-c6e5f311e364.csv
-📚 Arquivo de saída: manga-completo
+## Formato do CSV
 
-📋 Coletando imagens de 3 pasta(s)...
-
-📁 Processando pasta 1/3: Capítulo 1
-   🖼️ Encontradas 15 imagem(ns)
-   ✅ 15 imagem(ns) adicionadas
-
-📁 Processando pasta 2/3: Capítulo 2
-   🖼️ Encontradas 18 imagem(ns)
-   ✅ 18 imagem(ns) adicionadas
-
-📁 Processando pasta 3/3: Capítulo 3
-   🖼️ Encontradas 22 imagem(ns)
-   ✅ 22 imagem(ns) adicionadas
-
-🎯 Total de imagens coletadas: 55
-
-📚 Criando EPUB unificado...
-   📁 Criando estrutura EPUB...
-   🖼️ Copiando imagens...
-   📄 Copiadas 25/55 imagens
-   📄 Copiadas 50/55 imagens
-   📄 Copiadas 55/55 imagens
-   📄 Criando páginas HTML...
-   📝 Criadas 50/55 páginas HTML
-   📝 Criadas 55/55 páginas HTML
-   📋 Criando manifest...
-   🗂️ Criando índice de navegação...
-   📦 Compactando EPUB...
-
-📊 Estatísticas do processamento:
-   📂 Pastas processadas: 3
-   🖼️ Total de imagens: 55
-
-   📈 Imagens por pasta:
-     • Capítulo 1: 15 imagem(ns)
-     • Capítulo 2: 18 imagem(ns)
-     • Capítulo 3: 22 imagem(ns)
-
-   📚 Arquivo de saída: /home/user/projeto/epub/manga-completo.epub
-   📄 Total de páginas no EPUB: 55
-
-✅ Fusão de EPUB concluída com sucesso!
-🎉 Arquivo unificado salvo em: /home/user/projeto/epub/manga-completo.epub
-```
-
-**Características especiais do EPUB fusionado**:
-- 📖 **Navegação hierárquica** - Cada pasta vira um capítulo no índice
-- 🏷️ **Identificação de páginas** - Cada página mostra o capítulo e número
-- �️ **Índice organizado** - Estrutura: Capítulo > Páginas
-- 📱 **Compatibilidade** - Funciona em todos os leitores de EPUB
-- 💾 **Eficiência** - Arquivo único, menor overhead
-
-## �🔗 Como os modos se conectam
-
-O sistema oferere **6 modos diferentes** que podem ser usados conforme sua necessidade:
-
-### 📊 **Modo 1 - Análise** (`analizer.js`)
-- **Entrada**: Um diretório com várias pastas
-- **Saída**: Arquivo CSV listando todas as pastas encontradas
-- **Uso**: Preparação para processamento em lote
-
-### 🔀 **Modo 2 - Conversão Individual** (`gen-pdf.js`)
-- **Entrada**: Uma pasta específica + nome do arquivo
-- **Saída**: Um PDF com as imagens dessa pasta
-- **Uso**: Converter apenas uma pasta por vez
-
-### 📋 **Modo 3 - Conversão em Lote** (`gen-pdf.js` + CSV)
-- **Entrada**: Arquivo CSV (do Modo 1)
-- **Saída**: Múltiplos PDFs (um para cada pasta do CSV)
-- **Uso**: Converter várias pastas em PDFs separados
-
-### 🔗 **Modo 4 - Fusão Unificada** (`gen-lote-pdf.js` + CSV)
-- **Entrada**: Arquivo CSV (do Modo 1)
-- **Saída**: Um único PDF com todas as imagens de todas as pastas
-- **Uso**: Criar um documento único com tudo junto
-
-### 🎯 **Comparação dos Modos de Conversão**
-
-| Modo | Entrada | Resultado | Exemplo de Uso |
-|------|---------|-----------|----------------|
-| **Individual** | 1 pasta | 1 PDF | Converter apenas "Contrato_Casa" |
-| **Lote** | CSV com 3 pastas | 3 PDFs separados | "Contrato_Casa.pdf", "Documento_Carro.pdf", "Certidao.pdf" |
-| **Fusão** | CSV com 3 pastas | 1 PDF unificado | "Documentos_Completos.pdf" (todas as imagens juntas) |
-
-### Fluxo completo de trabalho:
-
-1. **Passo 1 - Análise**: 
-   ```bash
-   npm run analize /home/usuario/documentos/escaneados
-   ```
-   - Resultado: Arquivo CSV em `csv/[uuid].csv`
-
-2. **Passo 2 - Conversão em Lote**:
-   ```bash
-   npm run gen-pdf csv/[uuid].csv
-   ```
-   - Resultado: Vários PDFs em `pdf/`
-
-### Exemplo prático completo:
-
-Imagine que você tem esta estrutura de pastas:
-```
-/home/usuario/documentos/escaneados/
-├── Contrato_Casa/
-│   ├── 1.jpg
-│   ├── 2.jpg
-│   └── 3.jpg
-├── Documento_Carro/
-│   ├── 1.png
-│   ├── 2.png
-│   ├── 3.png
-│   └── 4.png
-└── Certidao_Nascimento/
-    ├── 1.jpg
-    └── 2.jpg
-```
-
-**Passo 1** - Analise as pastas:
-```bash
-npm run analize /home/usuario/documentos/escaneados
-```
-
-**Resultado**: Cria `csv/xyz123.csv` com:
-```csv
-nome;caminho
-Contrato_Casa;/home/usuario/documentos/escaneados/Contrato_Casa
-Documento_Carro;/home/usuario/documentos/escaneados/Documento_Carro
-Certidao_Nascimento;/home/usuario/documentos/escaneados/Certidao_Nascimento
-```
-
-**Passo 2** - Converta todas em PDF:
-```bash
-npm run gen-pdf csv/xyz123.csv
-```
-
-**Resultado**: Cria 3 PDFs em `pdf/`:
-- `pdf/Contrato_Casa.pdf` (com 3 páginas)
-- `pdf/Documento_Carro.pdf` (com 4 páginas)  
-- `pdf/Certidao_Nascimento.pdf` (com 2 páginas)
-
-## 📁 Estrutura necessária para as imagens
-
-Para que a conversão funcione corretamente, as imagens dentro de cada pasta devem estar nomeadas numericamente:
-
-```
-pasta-exemplo/
-├── 1.jpg      ← Primeira página
-├── 2.png      ← Segunda página  
-├── 3.jpeg     ← Terceira página
-├── 4.gif      ← Quarta página
-└── 10.webp    ← Décima página (ordena corretamente)
-```
-
-**Importante**: O sistema ordena as imagens numericamente, então `10.jpg` vem depois de `9.jpg` (não depois de `1.jpg`).
-
-## 🖼️ Formatos de imagem suportados
-
-- **JPG** / **JPEG**
-- **PNG** 
-- **GIF**
-- **BMP**
-- **WEBP**
-
-## � Estrutura dos arquivos CSV
-
-O arquivo CSV gerado pelo `analizer.js` tem este formato:
+Cabecalho esperado:
 
 ```csv
 nome;caminho
-Pasta1;/caminho/completo/para/Pasta1
-Pasta2;/caminho/completo/para/Pasta2
-"Pasta com espaços";/caminho/para/pasta com espaços
 ```
 
-- **Nome**: Nome da pasta (será usado como nome do PDF)
-- **Caminho**: Caminho completo para a pasta contendo as imagens
-- **Separador**: Ponto e vírgula (;)
-- **Aspas**: Usadas quando o nome contém espaços ou caracteres especiais
+Exemplo:
 
-## 🛠️ Estrutura do projeto
-
+```csv
+nome;caminho
+Pasta1;/caminho/para/Pasta1
+"Pasta com espacos";/caminho/para/pasta com espacos
 ```
+
+## Regras de ordenacao
+
+- Subpastas no `analizer.js`: ordenacao natural com locale `pt-BR`.
+- Imagens nos conversores: tenta ordenar numericamente pelo nome-base (`1`, `2`, `10`); se nao for numerico, cai para ordem alfabetica.
+
+## Formatos de imagem suportados
+
+- `.jpg`
+- `.jpeg`
+- `.png`
+- `.gif`
+- `.bmp`
+- `.webp`
+
+## Limitacoes conhecidas
+
+1. `analizer.js` nao cria automaticamente a pasta `csv/` se ela nao existir.
+2. `gen-pdf.js` no modo individual salva no diretorio atual (nao forca `pdf/`).
+3. `gen-pdf.js` nao cria automaticamente a pasta `pdf/` no modo lote.
+4. A validacao de tipo de imagem e feita por extensao de arquivo.
+5. Arquivos de saida podem ser sobrescritos sem confirmacao.
+6. CSV com cabecalho e sem entradas validas gera erro de "Nenhuma entrada valida" nos modos por CSV.
+
+## Estrutura esperada
+
+```text
 images-batch-pdf/
-├── analizer.js           # Script de análise de pastas
-├── gen-pdf.js           # Script de conversão para PDF  
-├── gen-lote-pdf.js      # Script de fusão em PDF único
-├── gen-epub.js          # Script de conversão para EPUB
-├── gen-lote-epub.js     # Script de fusão em EPUB único
-├── package.json         # Configurações e dependências
-├── readme.md           # Esta documentação
-├── .gitignore          # Arquivos ignorados pelo Git
-├── csv/                # Pasta onde ficam os arquivos CSV
-│   ├── arquivo1.csv
-│   └── arquivo2.csv
-├── pdf/                # Pasta onde ficam os PDFs gerados
-│   ├── documento1.pdf
-│   └── documento2.pdf
-└── epub/               # Pasta onde ficam os EPUBs gerados
-    ├── livro1.epub
-    └── livro2.epub
+|-- analizer.js
+|-- gen-pdf.js
+|-- gen-lote-pdf.js
+|-- gen-epub.js
+|-- gen-lote-epub.js
+|-- package.json
+|-- csv/
+|-- pdf/
+`-- epub/
 ```
 
-## ⚠️ Coisas importantes para saber
-
-### Erros comuns e soluções:
-
-1. **"Pasta não encontrada"**
-   - Verifique se o caminho está correto
-   - Use caminhos absolutos quando possível
-
-2. **"Nenhuma imagem encontrada"**
-   - Verifique se a pasta contém arquivos de imagem
-   - Confirme se os formatos são suportados
-
-3. **"Erro ao criar PDF"**
-   - Verifique se a pasta `pdf/` existe
-   - Confirme se você tem permissão de escrita
-
-### Dicas de uso:
-
-- **Caminhos com espaços**: Use aspas: `npm run analize "/pasta com espaços"`
-- **Muitas pastas**: O modo CSV é mais eficiente que conversões individuais
-- **Organização**: Mantenha os CSVs na pasta `csv/` para facilitar localização
-- **Backup**: Os arquivos CSV podem ser reutilizados quantas vezes quiser
-
-## 🚀 Comandos rápidos de referência
+## Exemplo rapido de fluxo
 
 ```bash
-# Instalar dependências
-npm install
+# 1) analisar diretorio com subpastas
+npm run analize /home/usuario/documentos lote-documentos
 
-# Criar pastas necessárias  
-mkdir -p csv pdf
+# 2) gerar um PDF por pasta listada no CSV
+npm run gen-pdf csv/lote-documentos.csv
 
-# Analisar um diretório
-npm run analize /caminho/para/diretorio
-
-# Converter uma pasta específica
-npm run gen-pdf /pasta/com/imagens nome-pdf
-
-# Conversão em lote usando CSV
-npm run gen-pdf csv/nome-do-arquivo.csv
-
-# Fusão de múltiplas pastas em PDF único
-npm run gen-lote-pdf csv/nome-do-arquivo.csv documento-unificado
-
-# Conversão para EPUB (livro eletrônico)
-npm run gen-epub /pasta/com/imagens nome-do-livro
-npm run gen-epub csv/nome-do-arquivo.csv
+# 3) gerar um PDF unico com todas as imagens
+npm run gen-lote-pdf csv/lote-documentos.csv lote-completo
 ```
 
-## 👨‍💻 Desenvolvido por
+## Licenca
 
-**Wiris Wernek**  
-GitHub: [@WirisWernek](https://github.com/WirisWernek)
-
-## 📜 Licença
-
-Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE para detalhes.
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-
-- Relatar bugs
-- Sugerir melhorias
-- Submeter pull requests
-- Melhorar a documentação
-
-## ⭐ Se este projeto foi útil
-
-Se este projeto te ajudou, considere dar uma ⭐ no repositório!
+MIT.
